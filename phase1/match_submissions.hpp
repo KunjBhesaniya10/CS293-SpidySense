@@ -8,6 +8,8 @@
 #include <utility>
 #include<unordered_map>
 #include<set>
+#include<queue>
+#include<algorithm>
 #define ll long long 
 
 // -----------------------------------------------------------------------------
@@ -22,13 +24,33 @@
 //for submission 2
 // Match struct to store interval of matching subsequence [start,start+length)
 struct Match{
-    ll start;
-    ll end;
+    ll start_file1;
+    ll start_file2;
+    ll length;
+    ll end_file1;
+    ll end_file2;
 };
 
-bool overlap(Match a, Match b){
-  return a.start < b.end && b.start < a.end;
-}
+//comparator for the set
+struct isLessthan2{
+    bool operator()( Match &a,  Match &b){
+        return a.start_file2 < b.start_file2;
+    }
+};
+
+struct isLessthan1{
+    bool operator()( Match &a,  Match &b){
+        return a.start_file1 < b.start_file1;
+    } 
+};
+
+    bool compareEnd1( Match &a, ll end1){
+        return a.start_file1 < end1;
+    }
+
+    bool compareEnd2( Match &a, ll end2){
+        return a.start_file2 < end2;
+    }
 
 std::pair<ll,ll> hashing(std::vector<int> text, ll len){
     ll prime = 1.0e9+7;
@@ -65,13 +87,21 @@ void calculate_hashes(std::unordered_multimap<ll,ll> &hash_set, std::vector<int>
         hash_set.insert({hashed,i});
     }
 }
+//CITATION : https://stackoverflow.com/questions/24026073/algorithm-to-find-maximum-coverage-of-non-overlapping-sequences-i-e-the-weig
+Match* next(ll start, ll end, Match M, std::vector<Match> &v ){
+    auto it = std::upper_bound(v.begin()+start,v.begin()+end, M.end_file1, compareEnd1);
+}
+
+void remove_overlap(std::vector<Match> &sub1, std::vector<Match> &sub2){
+    sort(sub1.begin(),sub1.end(),isLessthan1());
+    sort(sub2.begin(),sub2.end(),isLessthan2());
+}
 
 std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> &submission2){
-    
-        std::vector<Match> final_matches;
-        std::set<Match> existing_matches_sub1;
-        std::set<Match> existing_matches_sub2;
 
+        std::vector<Match> final_matches;  // look for better data structure
+        std::vector<Match> sub2_match;
+        std::vector<Match> sub1_match;
         for(int match_len =10; match_len <= 20; match_len++){
             
             std::unordered_multimap<ll,ll> hash_set;
@@ -79,27 +109,18 @@ std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> 
                 return {0,0,0,0,0};
              }
             calculate_hashes(hash_set, submission1, match_len);
-        
+        // initialising the hash set for submission 2
             std::pair<ll,ll> v = hashing(submission2,match_len);
             ll hashed = v.first, x= v.second;
             ll prime= 1.0e9+7;
             auto it = hash_set.find(hashed);
             if( it != hash_set.end()){
-                    std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
-                    std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<0<<'\n';
-                    
-                    // checking for overlap with existing matches in submission 1
-                    // Match sub1_match = {it->second, it->second+match_len};
-                    // bool overlap_flag = false;
-                    // do{
-                    // auto it = existing_matches_sub1.lower_bound(sub1_match);
-                    // auto it2 = existing_matches_sub1.lower_bound(sub1_match);
-                    // }
-                    // Match sub2_match = {match_len,0};
-                    // f
-                    
-                    // hash_set.erase(it);
-                    // }
+                    // std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
+                    // std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<0<<'\n';
+                    Match m = {match_len, it->second, 0, it->second+match_len, match_len};
+                    sub1_match.push_back(m);
+                    sub2_match.push_back(m);
+                    hash_set.erase(it);
             }
             
             for(int i = 1; i<submission2.size()-match_len; i++){
@@ -108,12 +129,16 @@ std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> 
                 hashed=hashed%prime;
                 it = hash_set.find(hashed);
                 if( it != hash_set.end()){
-                    std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
-                    std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<i<<'\n';
-
+                    // std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
+                    // std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<i<<'\n';
+                    Match m = {match_len, it->second, i, it->second+match_len, i+match_len};
+                    sub1_match.push_back(m);
+                    sub2_match.push_back(m);
                     hash_set.erase(it);
                 }
             }
+
+
 
         }
     
@@ -123,17 +148,6 @@ return {0,0,0,0,0};
 std::array<int, 5> match_submissions(std::vector<int> &submission1, 
         std::vector<int> &submission2) {
     // TODO: Write your code here
-
-//    std::cout<<"\n\n\n\n\n\n\n";
-//     std::cerr << submission1.size()<<" "<<submission2.size()<<'\n';
-//     for(int i=0; i<submission1.size(); i++){
-//         std::cerr <<"("<<i<<","<<submission1[i]<<") ";
-//     }
-//     std::cerr << '\n';
-//     std::cerr<< '\n';
-//     for(int i=0; i<submission2.size(); i++){
-//         std::cerr <<"("<<i<<","<<submission2[i]<<") ";
-//     }
 
     // std::cerr<<hashing(submission1, submission1.size()).first<<'\n';;
     // std::cerr << hashing(submission2, submission2.size()).second<<'\n';
