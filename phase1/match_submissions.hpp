@@ -21,44 +21,43 @@
 // OPTIONAL: Add your helper functions and data structures here
 
 
-//for submission 2
-// Match struct to store interval of matching subsequence [start,start+length)
+/// @brief Match struct to store interval of matching subsequence [start,start+length)
+/// @param length: length of matching subsequence
+/// @param start_file1: start index of matching subsequence in submission1
+/// @param start_file2: start index of matching subsequence in submission2
+/// @param end_file1: end index of matching subsequence in submission1
+/// @param end_file2: end index of matching subsequence in submission2
 struct Match{
+    ll length;
     ll start_file1;
     ll start_file2;
-    ll length;
     ll end_file1;
     ll end_file2;
 };
 
-//comparator for the set
+/// @brief  Custom comparator for priority queue to sort Match objects based on start_file2
 struct isLessthan2{
     bool operator()( Match &a,  Match &b){
         return a.start_file2 < b.start_file2;
     }
 };
 
+/// @brief  Custom comparator for priority queue to sort Match objects based on start_file1
 struct isLessthan1{
     bool operator()( Match &a,  Match &b){
         return a.start_file1 < b.start_file1;
     } 
 };
 
-    bool compareEnd1( Match &a, ll end1){
-        return a.start_file1 < end1;
-    }
+// -----------------------------------------------------------------------------
 
-    bool compareEnd2( Match &a, ll end2){
-        return a.start_file2 < end2;
-    }
-
+/// @brief Calculating Hashes
 std::pair<ll,ll> hashing(std::vector<int> text, ll len){
     ll prime = 1.0e9+7;
     // std::cout<<"prime: "<<prime<<std::endl;
     ll x = 1;
     ll hashed = 0;
     for(ll i =0; i<len; i++,x=((x%prime)*33)){
-       
         hashed = (hashed%prime+ (((x%prime)*text[len-i-1]) % prime))%prime;
     }
     x/=33;
@@ -66,15 +65,12 @@ std::pair<ll,ll> hashing(std::vector<int> text, ll len){
     return {hashed, x};
 }
 
-//for submission 1
 void calculate_hashes(std::unordered_multimap<ll,ll> &hash_set, std::vector<int> &text, ll len){
     ll prime = 1.0e9+7;
     ll x = 1;
     ll hashed = 0;
     for(ll i =0; i<len; i++,x = ((x%prime)*33)){
-       
         hashed= (hashed%prime+(((x%prime)*text[len-i-1]) % prime))%prime;
-
     }
     hashed = hashed % prime;
     x/=33;
@@ -87,62 +83,58 @@ void calculate_hashes(std::unordered_multimap<ll,ll> &hash_set, std::vector<int>
         hash_set.insert({hashed,i});
     }
 }
-//CITATION : https://stackoverflow.com/questions/24026073/algorithm-to-find-maximum-coverage-of-non-overlapping-sequences-i-e-the-weig
-Match* next(ll start, ll end, Match M, std::vector<Match> &v ){
-    auto it = std::upper_bound(v.begin()+start,v.begin()+end, M.end_file1, compareEnd1);
-}
 
-void remove_overlap(std::vector<Match> &sub1, std::vector<Match> &sub2){
-    sort(sub1.begin(),sub1.end(),isLessthan1());
-    sort(sub2.begin(),sub2.end(),isLessthan2());
-}
+std::pair<std::priority_queue<Match, isLessthan1>,std::priority_queue<Match, isLessthan2>> rolling_hash(std:: vector<int> &submission1, std::vector<int> &submission2){
 
-std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> &submission2){
+    std::priority_queue<Match, isLessthan1> sub_1_matchings;
+    std::priority_queue<Match, isLessthan2> sub_2_matchings;
 
-        std::vector<Match> final_matches;  // look for better data structure
-        std::vector<Match> sub2_match;
-        std::vector<Match> sub1_match;
-        for(int match_len =10; match_len <= 20; match_len++){
-            
-            std::unordered_multimap<ll,ll> hash_set;
-            if(match_len > submission1.size() || match_len > submission2.size()){
-                return {0,0,0,0,0};
-             }
-            calculate_hashes(hash_set, submission1, match_len);
-        // initialising the hash set for submission 2
-            std::pair<ll,ll> v = hashing(submission2,match_len);
-            ll hashed = v.first, x= v.second;
-            ll prime= 1.0e9+7;
-            auto it = hash_set.find(hashed);
-            if( it != hash_set.end()){
-                    // std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
-                    // std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<0<<'\n';
-                    Match m = {match_len, it->second, 0, it->second+match_len, match_len};
-                    sub1_match.push_back(m);
-                    sub2_match.push_back(m);
-                    hash_set.erase(it);
-            }
-            
-            for(int i = 1; i<submission2.size()-match_len; i++){
-                hashed = (hashed - (submission2[i - 1] * x % prime) + prime) % prime;
-                hashed = (hashed * 33 + submission2[i + match_len - 1]) % prime;
-                hashed=hashed%prime;
-                it = hash_set.find(hashed);
-                if( it != hash_set.end()){
-                    // std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
-                    // std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<i<<'\n';
-                    Match m = {match_len, it->second, i, it->second+match_len, i+match_len};
-                    sub1_match.push_back(m);
-                    sub2_match.push_back(m);
-                    hash_set.erase(it);
-                }
-            }
-
-
-
+    for(int match_len =10; match_len <= 20; match_len++){
+        
+        std::unordered_multimap<ll,ll> hash_set;
+        if(match_len > submission1.size() || match_len > submission2.size()){
+            return {0,0,0,0,0};
         }
+        calculate_hashes(hash_set, submission1, match_len);
+            // initialising the hash set for submission 2
+        std::pair<ll,ll> v = hashing(submission2,match_len);
+        ll hashed = v.first, x= v.second;
+        ll prime= 1.0e9+7;
+        auto it = hash_set.find(hashed);
+        if( it != hash_set.end()){
+            // std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
+            // std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<0<<'\n';
+            Match m = {match_len, it->second, 0, it->second+match_len, match_len};
+            sub_1_matchings.push(m);
+            sub_2_matchings.push(m);
+            hash_set.erase(it);
+        }
+        
+        for(int i = 1; i<submission2.size()-match_len; i++){
+            hashed = (hashed - (submission2[i - 1] * x % prime) + prime) % prime;
+            hashed = (hashed * 33 + submission2[i + match_len - 1]) % prime;
+            hashed=hashed%prime;
+            it = hash_set.find(hashed);
+            if( it != hash_set.end()){
+                // std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
+                // std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<i<<'\n';
+                Match m = {match_len, it->second, i, it->second+match_len, i+match_len};
+                sub_1_matchings.push(m);
+                sub_2_matchings.push(m);
+                hash_set.erase(it);
+            }
+        }
+    }
+    return std::make_pair(sub_1_matchings, sub_2_matchings);
+}
+/// Hash Calculated and Values Matched
+
+// -----------------------------------------------------------------------------
+
+std::pair<std::priority_queue<Match, isLessthan1>,std::priority_queue<Match, isLessthan2>> remove_overlaps(std::pair<std::priority_queue<Match, isLessthan1> ,std::priority_queue<Match, isLessthan2>> &all_matchings){
+    auto sub_1_matchings = all_matchings.first;
+    auto sub_2_matchings = all_matchings.second;
     
-return {0,0,0,0,0};
 }
 
 std::array<int, 5> match_submissions(std::vector<int> &submission1, 
