@@ -1,4 +1,5 @@
 #include <array>
+#include<chrono>
 #include <iostream>
 #include <span>
 #include <vector>
@@ -6,6 +7,7 @@
 #include<map>
 #include <utility>
 #include<unordered_map>
+#include<set>
 #define ll long long 
 
 // -----------------------------------------------------------------------------
@@ -16,15 +18,18 @@
 
 // OPTIONAL: Add your helper functions and data structures here
 
-struct hash_first {
-    template <class T1, class T2>
-    std::size_t operator()(const std::pair<T1, T2>& p) const {
-        auto hash1 = std::hash<T1>{}(p.first);
-        return hash1; 
-    }
-};
 
 //for submission 2
+// Match struct to store interval of matching subsequence [start,start+length)
+struct Match{
+    ll start;
+    ll end;
+};
+
+bool overlap(Match a, Match b){
+  return a.start < b.end && b.start < a.end;
+}
+
 std::pair<ll,ll> hashing(std::vector<int> text, ll len){
     ll prime = 1.0e9+7;
     // std::cout<<"prime: "<<prime<<std::endl;
@@ -63,9 +68,11 @@ void calculate_hashes(std::unordered_multimap<ll,ll> &hash_set, std::vector<int>
 
 std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> &submission2){
     
+        std::vector<Match> final_matches;
+        std::set<Match> existing_matches_sub1;
+        std::set<Match> existing_matches_sub2;
 
-    
-        for(int match_len =10; match_len < std::min(submission1.size(),submission2.size()); match_len++){
+        for(int match_len =10; match_len <= 20; match_len++){
             
             std::unordered_multimap<ll,ll> hash_set;
             if(match_len > submission1.size() || match_len > submission2.size()){
@@ -80,34 +87,34 @@ std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> 
             if( it != hash_set.end()){
                     std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
                     std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<0<<'\n';
-                    // std::cout << "Matched elements sub1: \n";
-                    // for(int i=it->second; i<it->second+match_len; i++){
-                    //     std::cout << submission1[i]<<" ";
+                    
+                    // checking for overlap with existing matches in submission 1
+                    // Match sub1_match = {it->second, it->second+match_len};
+                    // bool overlap_flag = false;
+                    // do{
+                    // auto it = existing_matches_sub1.lower_bound(sub1_match);
+                    // auto it2 = existing_matches_sub1.lower_bound(sub1_match);
                     // }
-                    hash_set.erase(it);
-                }
-
+                    // Match sub2_match = {match_len,0};
+                    // f
+                    
+                    // hash_set.erase(it);
+                    // }
+            }
+            
             for(int i = 1; i<submission2.size()-match_len; i++){
                 hashed = (hashed - (submission2[i - 1] * x % prime) + prime) % prime;
                 hashed = (hashed * 33 + submission2[i + match_len - 1]) % prime;
                 hashed=hashed%prime;
-                if(i<=10 && match_len==10)std::cerr<< "i: "<<i<<" "<<hashed<<'\n';
-                 it = hash_set.find(hashed);
+                it = hash_set.find(hashed);
                 if( it != hash_set.end()){
-                    std::cout << "Match found :"<<" "<<match_len<<" "<<i<<" "<<hashed<<" "<<it->first<<'\n';
+                    std::cout << "Match found :"<<" "<<match_len<<" "<<hashed<<" "<<it->first<<'\n';
                     std::cout << "sub1 idx "<<it->second<<" sub2 idx "<<i<<'\n';
-                    // std::cout << "Matched elements sub2: \n";
-                    // for(int k=i; k<i+match_len; k++){
-                    //     std::cout << submission2[k]<<" ";
-                    // }
-                    // std::cout << "Matched elements sub1: \n";
-                    // for(int k=it->second; k<it->second+match_len; k++){
-                    //     std::cout << submission1[k]<<" ";
-                    // }
 
                     hash_set.erase(it);
                 }
             }
+
         }
     
 return {0,0,0,0,0};
@@ -117,20 +124,27 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
         std::vector<int> &submission2) {
     // TODO: Write your code here
 
-   std::cout<<"\n\n\n\n\n\n\n";
-    std::cerr << submission1.size()<<" "<<submission2.size()<<'\n';
-    for(int i=0; i<submission1.size(); i++){
-        std::cerr <<"("<<i<<","<<submission1[i]<<") ";
-    }
-    std::cerr << '\n';
-    std::cerr<< '\n';
-    for(auto i : submission2){
-        std::cerr <<"("<<i<<","<<submission1[i]<<") ";
-    }
+//    std::cout<<"\n\n\n\n\n\n\n";
+//     std::cerr << submission1.size()<<" "<<submission2.size()<<'\n';
+//     for(int i=0; i<submission1.size(); i++){
+//         std::cerr <<"("<<i<<","<<submission1[i]<<") ";
+//     }
+//     std::cerr << '\n';
+//     std::cerr<< '\n';
+//     for(int i=0; i<submission2.size(); i++){
+//         std::cerr <<"("<<i<<","<<submission2[i]<<") ";
+//     }
+
     // std::cerr<<hashing(submission1, submission1.size()).first<<'\n';;
     // std::cerr << hashing(submission2, submission2.size()).second<<'\n';
     std::array<int, 5> result = {0, 0, 0, 0, 0};
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto A = rolling_hash(submission1, submission2);
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cerr << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms" << std::endl;
+    // for(Match a : A){
+    //     std::cout << a.length <<" "<<a.start<<" "<<a.submission<<'\n';
+    // }
     return result; // dummy return
     // End TODO
 }
