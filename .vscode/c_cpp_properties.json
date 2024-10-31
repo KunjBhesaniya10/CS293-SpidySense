@@ -10,6 +10,20 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.22000.0",
+            "cStandard": "c17",
+            "compilerPath": "C:/msys64/clang64.exe"
         }
     ],
     "version": 4
