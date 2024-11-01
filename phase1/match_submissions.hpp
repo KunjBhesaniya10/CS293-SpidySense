@@ -147,11 +147,54 @@ return {0,0,0,0,0};
 
 // ----------------------------------------------------------------------------
 
-void find_longest(std::vector<int> &submission1, std::vector<int> &submission2, int &start_idx1, int &start_idx2, int &pattern_size){
-    
+double similarity(std::vector<int>::iterator a, std::vector<int>::iterator b, int size){
+    /// Dummy implementation
+    if (a == b){
+        return 1.0;
+    }
+    return 0.0;
 }
 
+void filter_to_check(std::vector<int> &submission, std::vector<std::vector<int>::iterator> &to_check, int size_to_match){
+    for (auto start_it = to_check.begin(); start_it != to_check.end(); start_it++){
+        for (auto it = start_it+1; it != to_check.end(); it++){
+            if (similarity(*start_it,*it,size_to_match) < 0.9){
+                to_check.erase(it);
+            }
+        }
+    }
+}
 
+void find_longest(std::vector<int> &submission1, std::vector<int> &submission2, int &start_idx1, int &start_idx2, int &pattern_size){
+    for (int size_to_match = 20; size_to_match < min(submission1.size(),submission2.size()); size_to_match+=10){
+        /// @brief  vector to store the indices of the elements to check for similarity
+        std::vector<std::vector<int>::iterator> to_check = submission1.begin();
+        for(int i=1; i<submission1.size()-size_to_match+1;i++){
+            to_check.emplace_back(to_check[0]+i);
+        }
+        filter_to_check(submission1, to_check, size_to_match);//filtering out the elements which are similar in submission1
+
+        // Checking for similarity in submission2
+        for (auto it_to_check = to_check.begin(); it_to_check != to_check.end(); it_to_check++){
+            for (int i = 0; i < submission2.size()-size_to_match; i++){
+                if (similarity(*it_to_check,submission2.begin()+i,size_to_match) > 0.9){
+                    start_idx1 = (int)(*it_to_check - submission1.begin());
+                    start_idx2 = i;
+                    if (size_to_match > pattern_size){
+                        pattern_size = size_to_match;
+                    }
+                    int j = i + size_to_match;
+                    while (j < min(submission1.size(),submission2.size()) && similarity((*it_to_check)+j-i,submission2.begin()+j, size_to_match) > 0.9){
+                        j+=size_to_match;
+                    }
+                    if (j-i > pattern_size){
+                        pattern_size = j-i;
+                    }
+                }
+            }
+        }
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -173,7 +216,9 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
 
     int idx1,idx2,longest_approx_pattern_size;
     find_longest(submission1,submission2,idx1,idx2,longest_approx_pattern_size);
-
+    result[2] = longest_approx_pattern_size;
+    result[3] = idx1;
+    result[4] = idx2;
 
     return result; // dummy return
     // End TODO
