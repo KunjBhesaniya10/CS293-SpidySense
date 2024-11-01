@@ -21,37 +21,36 @@
 // OPTIONAL: Add your helper functions and data structures here
 
 
-//for submission 2
-// Match struct to store interval of matching subsequence [start,start+length)
+/// @brief Match struct to store interval of matching subsequence [start,start+length)
+/// @param length: length of matching subsequence
+/// @param start_file1: start index of matching subsequence in submission1
+/// @param start_file2: start index of matching subsequence in submission2
+/// @param end_file1: end index of matching subsequence in submission1
+/// @param end_file2: end index of matching subsequence in submission2
 struct Match{
+    ll length;
     ll start_file1;
     ll start_file2;
-    ll length;
     ll end_file1;
     ll end_file2;
 };
-
-//comparator for the set
+/// @brief  Custom comparator for priority queue to sort Match objects based on start_file2
 struct isLessthan2{
     bool operator()( Match &a,  Match &b){
         return a.start_file2 < b.start_file2;
     }
 };
 
+/// @brief  Custom comparator for priority queue to sort Match objects based on start_file1
 struct isLessthan1{
     bool operator()( Match &a,  Match &b){
         return a.start_file1 < b.start_file1;
     } 
 };
 
-    bool compareEnd1( Match &a, ll end1){
-        return a.start_file1 < end1;
-    }
+// -----------------------------------------------------------------------------
 
-    bool compareEnd2( Match &a, ll end2){
-        return a.start_file2 < end2;
-    }
-
+/// @brief Calculating Hashes
 std::pair<ll,ll> hashing(std::vector<int> text, ll len){
     ll prime = 1.0e9+7;
     // std::cout<<"prime: "<<prime<<std::endl;
@@ -145,6 +144,17 @@ std::array<int,5> rolling_hash(std:: vector<int> &submission1, std::vector<int> 
 return {0,0,0,0,0};
 }
 
+
+// ----------------------------------------------------------------------------
+
+void find_longest(std::vector<int> &submission1, std::vector<int> &submission2, int &start_idx1, int &start_idx2, int &pattern_size){
+    
+}
+
+
+
+// -----------------------------------------------------------------------------
+
 std::array<int, 5> match_submissions(std::vector<int> &submission1, 
         std::vector<int> &submission2) {
     // TODO: Write your code here
@@ -159,6 +169,12 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
     // for(Match a : A){
     //     std::cout << a.length <<" "<<a.start<<" "<<a.submission<<'\n';
     // }
+
+
+    int idx1,idx2,longest_approx_pattern_size;
+    find_longest(submission1,submission2,idx1,idx2,longest_approx_pattern_size);
+
+
     return result; // dummy return
     // End TODO
 }
