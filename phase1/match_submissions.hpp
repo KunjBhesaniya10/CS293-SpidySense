@@ -146,19 +146,95 @@ return {0,0,0,0,0};
 
 
 // ----------------------------------------------------------------------------
+// cosine similarity
+double cosine_similarity(std::vector<int>::iterator start_a, std::vector<int>::iterator end_a,
+                         std::vector<int>::iterator start_b, std::vector<int>::iterator end_b) {
+    // Count frequency of tokens in both ranges
+    std::unordered_map<int, int> freq_a;
+    std::unordered_map<int, int> freq_b;
 
+    for (auto it = start_a; it != end_a; ++it) {
+        freq_a[*it]++;
+    }
+    for (auto it = start_b; it != end_b; ++it) {
+        freq_b[*it]++;
+    }
+
+    // Calculate dot product
+    double dot_product = 0.0;
+    for (const auto& [token, count] : freq_a) {
+        if (freq_b.find(token) != freq_b.end()) {
+            dot_product += count * freq_b[token];
+        }
+    }
+
+    // Calculate magnitudes
+    double magnitude_a = 0.0;
+    for (const auto& count : freq_a) {
+        magnitude_a += count.second * count.second;
+    }
+    magnitude_a = std::sqrt(magnitude_a);
+
+    double magnitude_b = 0.0;
+    for (const auto& count : freq_b) {
+        magnitude_b += count.second * count.second;
+    }
+    magnitude_b = std::sqrt(magnitude_b);
+
+    // Calculate cosine similarity
+    if (magnitude_a == 0.0 || magnitude_b == 0.0) {
+        return 0.0;  // No similarity if one vector is empty
+    }
+
+    return dot_product / (magnitude_a * magnitude_b);
+}
+
+// Function to compute cosine similarity between two sub-vectors of a specified size
+double cosine_similarity_with_window(std::vector<int>& submission, 
+                                     std::vector<int>::iterator start_a, 
+                                     std::vector<int>::iterator start_b, 
+                                     int window_size) {
+    // Ensure the window does not exceed the bounds of the submission vector
+    if (std::distance(start_a, submission.end()) < window_size || 
+        std::distance(start_b, submission.end()) < window_size) {
+        throw std::out_of_range("Window size exceeds vector bounds.");
+    }
+
+    // Define end iterators based on the window size
+    auto end_a = start_a + window_size;
+    auto end_b = start_b + window_size;
+
+    // Call the original cosine similarity function
+    return cosine_similarity(start_a, end_a, start_b, end_b);
+}
+
+
+//-----------------------------------------------------------------------------
 double similarity(std::vector<int>::iterator a, std::vector<int>::iterator b, int size){
     /// Dummy implementation
-    if (a == b){
-        return 1.0;
+    int match_count = 0;
+
+    // For each position in the range [a, a+size), look for a matching window in [b, b+size)
+    for (int i = 0; i < size; i++) {
+        bool found_match = false;
+        for (int j = 0; j < size; j++) {
+            if (*(a + i) == *(b + j)) {
+                found_match = true;
+                break;  
+            }
+        }
+        if (found_match) {
+            match_count++;
+        }
     }
-    return 0.0;
+    
+    return static_cast<double>(match_count) / size;
 }
 
 void filter_to_check(std::vector<int> &submission, std::vector<std::vector<int>::iterator> &to_check, int size_to_match){
     for (auto start_it = to_check.begin(); start_it != to_check.end(); start_it++){
         for (auto it = start_it+1; it != to_check.end(); it++){
-            if (similarity(*start_it,*it,size_to_match) < 0.9){
+            if (cosine_similarity_with_window(submission,*start_it,*it,size_to_match) < 0.9){
                 to_check.erase(it);
             }
         }
