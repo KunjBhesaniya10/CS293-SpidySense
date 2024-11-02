@@ -255,7 +255,7 @@ return {is_plagiarised,total_length};
 }
 
 // longest common subsequence
-int longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
+void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
     int m = X.size();
     int n = Y.size();
     std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1, 0));
@@ -283,11 +283,11 @@ int longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
         }
     }
     std::cerr << "LCS: \n";
-    for(int i = 0; i<lcs.size(); i++){
-        std::cerr << lcs[i]<<" ";
+    for(int k = 0; k<lcs.size(); k++){
+        std::cerr << lcs[k]<<" ";
     }
     std::cerr << '\n';
-    return dp[m][n];
+    std::cerr<< dp[m][n];
 }
 
 // -----------------------------------------------------------------------------
@@ -299,21 +299,19 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
     std::cerr << "submission2 size: "<<submission2.size()<<'\n';
     // std::cerr<<hashing(submission1, submission1.size()).first<<'\n';;
     // std::cerr << hashing(submission2, submission2.size()).second<<'\n';
-    for(int i = 0; i<submission1.size(); i++){
-        std::cerr << submission1[i]<<" ";
-    }
-    std::cerr << '\n';
-    for(int i = 0; i<submission2.size(); i++){
-        std::cerr << submission2[i]<<" ";
-    }   
+    // for(int i = 0; i<submission1.size(); i++){
+    //     std::cerr << submission1[i]<<" ";
+    // }
+    // std::cerr << '\n';
+    // for(int i = 0; i<submission2.size(); i++){
+    //     std::cerr << submission2[i]<<" ";
+    // }   
     std::cerr << '\n';
     std::array<int, 5> result = {0, 0, 0, 0, 0};
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    auto A = rolling_hash(submission1, submission2);
-    result[0] = A[0];
-    result[1] = A[1];
-    auto len = longestCommonSubsequence(submission1, submission2);
-    std::cout << "LCS: " << len << std::endl;
+    // auto A = rolling_hash(submission1, submission2);
+    // result[0] = A[0];
+    // result[1] = A[1];
     
     // for(Match a : A){
     //     std::cout << a.length <<" "<<a.start<<" "<<a.submission<<'\n';
@@ -321,10 +319,11 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
 
 
     int idx1,idx2,longest_approx_pattern_size;
-    find_longest(submission1,submission2,idx1,idx2,longest_approx_pattern_size);
-    result[2] = longest_approx_pattern_size;
-    result[3] = idx1;
-    result[4] = idx2;
+    // find_longest(submission1,submission2,idx1,idx2,longest_approx_pattern_size);
+    // result[2] = longest_approx_pattern_size;
+    // result[3] = idx1;
+    // result[4] = idx2;
+    longestCommonSubsequence(submission1,submission2);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cerr << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms" << std::endl;
 
