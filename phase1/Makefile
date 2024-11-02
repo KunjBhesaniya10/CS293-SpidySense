@@ -7,7 +7,7 @@ LDFLAGS = -lclang -L/usr/lib/llvm-18/lib -rpath /usr/lib/llvm-18/lib -fuse-ld=ll
 main: main.cpp tokenizer.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEFLAGS) $(LDFLAGS) $^ -o $@
 	rm -rf *.dSYM
-	./main > output.txt
+	./main 2>cerr.txt
 
 clean:
 	rm -rf main *.dSYM
