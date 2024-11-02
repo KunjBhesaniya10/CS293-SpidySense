@@ -208,6 +208,24 @@ int longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
         }
     }
 
+    std::vector<int> lcs;
+    int i = m, j = n;
+    while (i > 0 && j > 0) {
+        if (X[i - 1] == Y[j - 1]) {
+            lcs.push_back(X[i - 1]);
+            --i;
+            --j;
+        } else if (dp[i - 1][j] > dp[i][j - 1]) {
+            --i;
+        } else {
+            --j;
+        }
+    }
+    std::cerr << "LCS: \n";
+    for(int i = 0; i<lcs.size(); i++){
+        std::cerr << lcs[i]<<" ";
+    }
+    std::cerr << '\n';
     return dp[m][n];
 }
 
@@ -230,7 +248,7 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
     std::cerr << '\n';
     std::array<int, 5> result = {0, 0, 0, 0, 0};
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    auto A = rolling_hash(submission1, submission2);
+    // auto A = rolling_hash(submission1, submission2);
     auto len = longestCommonSubsequence(submission1, submission2);
     std::cout << "LCS: " << len << std::endl;
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
