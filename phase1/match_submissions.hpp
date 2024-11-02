@@ -246,7 +246,7 @@ double similarity_score(int window_size, int matching_len){
     return ((double)matching_len)/window_size;
 }
 
-void Large_pattern(std::vector<LCSelement> &lcs, int &start_idx1, int &start_idx2, int &pattern_size){
+void Large_pattern(std::vector<int>&sub1, std::vector<int>&sub2,std::vector<LCSelement> &lcs, int &start_idx1, int &start_idx2, int &pattern_size){
     int max_window_size = 0;
     int idx1,idx2;
     for(int i=0; i< lcs.size(); i++){
@@ -264,10 +264,45 @@ void Large_pattern(std::vector<LCSelement> &lcs, int &start_idx1, int &start_idx
     }
     std::cerr<<"max_window_size: "<<max_window_size<<'\n';
     std::cerr<<"idx1: "<<idx1<<" idx2: "<<idx2<<'\n';
+
     pattern_size = max_window_size;
     start_idx1 = idx1;
     start_idx2 = idx2;
 }
+
+void filter_lcs(std::vector<LCSelement> &lcs){
+    // fliter lcs such that there is continous sequence of at least 5 elements
+    int i=0;
+    int j=0;
+    for(int k=0; k<lcs.size();k++){
+        std::cerr << lcs[k].element << " start1 "<<lcs[k].start_file1<<" start2 "<<lcs[k].start_file2<<'\n';
+    }
+    std::cout << '\n';
+    while (i < lcs.size() && j < lcs.size()){
+        while(j<lcs.size() && lcs[j].start_file1 == lcs[i].start_file1+i-j && lcs[j].start_file2 == lcs[i].start_file2+i-j){
+            j++;
+        }
+       
+        if( j-i >= 10 ){
+            i = j;
+        }
+        else if( j-i <= 9){
+            do{
+                lcs[i].element = -1;
+                i++;
+            }
+            while(i<lcs.size() && i!=j);
+            }
+        }
+        for(int k=0; k <lcs.size(); k++){
+            if(lcs[k].element == -1){
+                lcs.erase(lcs.begin()+k);
+                k--;
+            }
+        }
+    }
+
+
 
 void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y, int &start_idx1, int &start_idx2, int &pattern_size) {
     int m = X.size();
@@ -296,7 +331,8 @@ void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y, int &sta
             --j;
         }
     }
-    Large_pattern(lcs,start_idx1,start_idx2,pattern_size);
+    filter_lcs(lcs);
+    Large_pattern(X,Y,lcs,start_idx1,start_idx2,pattern_size);
     std::cerr<<"lcs size: "<<lcs.size()<<'\n';
 }
 
@@ -307,6 +343,14 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1, std::vector<
     std::cerr << "submission1 size: "<<submission1.size()<<'\n';
     std::cerr << "submission2 size: "<<submission2.size()<<'\n';
     std::cerr << '\n';
+    // for(int i=0; i<submission1.size(); i++){
+    //     std::cerr<<submission1[i]<<" ";
+    // }   
+    // std::cerr << '\n';
+    // for(int i=0; i<submission2.size(); i++){
+    //     std::cerr<<submission2[i]<<" ";
+    // }
+    // std::cerr << '\n';
     std::array<int, 5> result = {0, 0, 0, 0, 0};
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     result[1]= rolling_hash(submission1, submission2);
