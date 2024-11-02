@@ -12,7 +12,7 @@
 #include<queue>
 #include<algorithm>
 #define ll long long 
-#define THRESHOLD 0.75
+#define THRESHOLD 0.85
 
 #include <iostream>
 
@@ -130,7 +130,15 @@ void find_longest(std::vector<int> &submission1, std::vector<int> &submission2, 
 }
 
 //-----------------------------------------------------------------------------
-
+bool evaluate_plag(int short_match_length, int large_match_length, int total_length){
+    if(float(short_match_length)/total_length >= 0.6){
+        return true;
+    }
+    else if(float(large_match_length)/total_length >= 0.5){
+        return true;
+    }
+    else return false;
+}
 std::pair<ll,ll> hashing(std::vector<int> text, ll len){
     ll prime = 1.0e9+7;
     // std::cout<<"prime: "<<prime<<std::endl;
@@ -206,7 +214,7 @@ ll remove_overlap(std::vector<Match> &matches){
     return dp[0];
 }
 
-std::array<int,2> rolling_hash(std:: vector<int> &submission1, std::vector<int> &submission2){
+int rolling_hash(std:: vector<int> &submission1, std::vector<int> &submission2){
         std::vector<Match> sub1_match;
         std::vector<Match> final_matches;
         int total_length ; // total length of the non overlaping matching subsequence.
@@ -214,7 +222,7 @@ std::array<int,2> rolling_hash(std:: vector<int> &submission1, std::vector<int> 
         for(int match_len =20; match_len >= 10; match_len--){
             std::unordered_multimap<ll,ll> hash_set;
             if(match_len > submission1.size() || match_len > submission2.size()){
-                return {0,0};
+                return 0;
              }
             calculate_hashes(hash_set, submission1, match_len);
         // initialising the hash set for submission 2
@@ -244,18 +252,52 @@ std::array<int,2> rolling_hash(std:: vector<int> &submission1, std::vector<int> 
                 }
             }
         }
-            total_length = remove_overlap(sub1_match);
-            std::cerr << total_length <<'\n';
-            if ( float(total_length)/std::min(submission1.size(),submission2.size()) > 0.6){
-                is_plagiarised = true;
-            }   
-        std::cerr<<"is_plagiarised: "<<is_plagiarised<<'\n';
-    
-return {is_plagiarised,total_length};
+        short_total_length = remove_overlap(sub1_match);
+
+    return short_total_length;
 }
 
 // longest common subsequence
-void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
+struct LCSelement{
+    int element;
+    int start_file1;
+    int start_file2;
+};
+
+double similarity_score(int window_size, int matching_len){
+    return ((double)matching_len)/window_size;
+}
+
+void Large_pattern(std::vector<LCSelement> &lcs, int &start_idx1, int &start_idx2, int &pattern_size){
+    int max_window_size = 0;
+    int idx1,idx2;
+    for(int i=0; i< lcs.size(); i++){
+        for(int j=i+1; j <lcs.size(); j++){
+            int window_size = std::max(lcs[i].start_file1-lcs[j].start_file1+1,lcs[i].start_file2-lcs[j].start_file2+1);
+            int matching_len = j-i+1;
+            // std::cerr<<"window_size: "<<window_size<<" matching_len: "<<matching_len<<'\n';
+            if(similarity_score(window_size,matching_len) >= THRESHOLD){
+                // std::cerr <<window_size<<" "<<matching_len<<" "<<float(matching_len/window_size)<<'\n';
+                if(max_window_size < window_size){
+                    max_window_size = window_size;
+                    idx1 = lcs[j].start_file1;
+                    idx2 = lcs[j].start_file2;
+                }
+                // std::cerr<<"window_size: "<<window_size<<" matching_len: "<<matching_len<<'\n';
+                // for(int k = i; k<=j; k++){
+                //     std::cerr<<lcs[k].element<<" ";
+                // }
+                // std::cerr<<'\n';
+        }
+    }
+    }
+    std::cerr<<"max_window_size: "<<max_window_size<<'\n';
+    std::cerr<<"idx1: "<<idx1<<" idx2: "<<idx2<<'\n';
+    pattern_size = max_window_size;
+    start_idx1 = idx1;
+    start_idx2 = idx2;
+}
+void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y, int &start_idx1, int &start_idx2, int &pattern_size) {
     int m = X.size();
     int n = Y.size();
     std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1, 0));
@@ -268,12 +310,12 @@ void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
                 dp[i][j] = std::max(dp[i - 1][j], dp[i][j - 1]);
         }
     }
+    std::vector<LCSelement> lcs;
 
-    std::vector<int> lcs;
     int i = m, j = n;
     while (i > 0 && j > 0) {
         if (X[i - 1] == Y[j - 1]) {
-            lcs.push_back(X[i - 1]);
+            lcs.push_back({X[i - 1], i - 1, j - 1});
             --i;
             --j;
         } else if (dp[i - 1][j] > dp[i][j - 1]) {
@@ -282,12 +324,8 @@ void longestCommonSubsequence(std::vector<int> &X, std::vector<int> &Y) {
             --j;
         }
     }
-    std::cerr << "LCS: \n";
-    for(int k = 0; k<lcs.size(); k++){
-        std::cerr << lcs[k]<<" ";
-    }
-    std::cerr << '\n';
-    std::cerr<< dp[m][n];
+    Large_pattern(lcs,start_idx1,start_idx2,pattern_size);
+    std::cerr<<"lcs size: "<<lcs.size()<<'\n';
 }
 
 // -----------------------------------------------------------------------------
@@ -297,37 +335,22 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
     // TODO: Write your code here
     std::cerr << "submission1 size: "<<submission1.size()<<'\n';
     std::cerr << "submission2 size: "<<submission2.size()<<'\n';
-    // std::cerr<<hashing(submission1, submission1.size()).first<<'\n';;
-    // std::cerr << hashing(submission2, submission2.size()).second<<'\n';
-    // for(int i = 0; i<submission1.size(); i++){
-    //     std::cerr << submission1[i]<<" ";
-    // }
-    // std::cerr << '\n';
-    // for(int i = 0; i<submission2.size(); i++){
-    //     std::cerr << submission2[i]<<" ";
-    // }   
     std::cerr << '\n';
     std::array<int, 5> result = {0, 0, 0, 0, 0};
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    // auto A = rolling_hash(submission1, submission2);
-    // result[0] = A[0];
-    // result[1] = A[1];
-    
-    // for(Match a : A){
-    //     std::cout << a.length <<" "<<a.start<<" "<<a.submission<<'\n';
-    // }
+    result[1]= rolling_hash(submission1, submission2);
 
-
-    int idx1,idx2,longest_approx_pattern_size;
-    // find_longest(submission1,submission2,idx1,idx2,longest_approx_pattern_size);
-    // result[2] = longest_approx_pattern_size;
-    // result[3] = idx1;
-    // result[4] = idx2;
-    longestCommonSubsequence(submission1,submission2);
+    int start_idx1, start_idx2, pattern_size;
+    longestCommonSubsequence(submission1,submission2,start_idx1,start_idx2,pattern_size);
+    result[2] = pattern_size;
+    result[3] = start_idx1;
+    result[4] = start_idx2;
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cerr << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms" << std::endl;
 
-    return result; // dummy return
+    result[0] = evaluate_plag(result[1],result[2],std::min(submission1.size(),submission2.size()));
+
+    return result;
     // End TODO
 }
 
