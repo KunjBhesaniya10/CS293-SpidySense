@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <algorithm>
 #define ll long long
-#define THRESHOLD 0.869
-#define prime 1000000007LL
+#define THRESHOLD 0.85
+#define PRIME 1000000007LL
 
 // -----------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ bool sortMatches(Match &a, Match &b)
 // Function to evaluate the boolean plagiarism
 bool evaluate_plag(int short_match_length, int large_match_length, int total_length)
 {
-    if (float(short_match_length) / total_length >= 0.7)
+    if (float(short_match_length) / total_length >= 0.6)
     {
         return true;
     }
@@ -62,12 +62,12 @@ std::pair<ll, int> hashing(std::vector<int> text, int len)
 {
     ll x = 1;
     ll hashed = 0;
-    for (ll i = 0; i < len; i++, x = ((x % prime) * 33))
+    for (ll i = 0; i < len; i++, x = ((x % PRIME) * 33))
     {
-        hashed = (hashed % prime + (((x % prime) * text[len - i - 1]) % prime)) % prime;
+        hashed = (hashed % PRIME + (((x % PRIME) * text[len - i - 1]) % PRIME)) % PRIME;
     }
     x /= 33;
-    hashed = hashed % prime;
+    hashed = hashed % PRIME;
     return {hashed, x};
 }
 
@@ -79,8 +79,8 @@ void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<in
     hash_set.insert({hashed, 0});
     for (int i = 1; i <= text.size() - len; i++)
     {
-        hashed = (hashed - (text[i - 1] * x % prime) + prime) % prime;
-        hashed = (hashed * 33 + text[i + len - 1]) % prime;
+        hashed = (hashed - (text[i - 1] * x % PRIME) + PRIME) % PRIME;
+        hashed = (hashed * 33 + text[i + len - 1]) % PRIME;
 
         hash_set.insert({hashed, i});
     }
@@ -163,9 +163,9 @@ int rolling_hash(std::vector<int> &submission1, std::vector<int> &submission2)
         for (int i = 1; i < submission2.size() - match_len; i++)
         {
             //calculating the hash for the next window.
-            hashed = (hashed - (submission2[i - 1] * x % prime) + prime) % prime;
-            hashed = (hashed * 33 + submission2[i + match_len - 1]) % prime;
-            hashed = hashed % prime;
+            hashed = (hashed - (submission2[i - 1] * x % PRIME) + PRIME) % PRIME;
+            hashed = (hashed * 33 + submission2[i + match_len - 1]) % PRIME;
+            hashed = hashed % PRIME;
             it = hash_set.find(hashed); //searching for the match in the hash_set.
             if (it != hash_set.end())
             {
@@ -259,10 +259,6 @@ void filter_lcs(std::vector<LCSelement> &lcs)
             k--;
         }
     }
-    for(int k=0; k<lcs.size(); k++){
-        std::cerr<<lcs[k].element<<" ";
-    }
-    std::cerr<<std::endl;
 }
 
 // finding longest pattern by obtaining LCS using dynamic programming and extracting
