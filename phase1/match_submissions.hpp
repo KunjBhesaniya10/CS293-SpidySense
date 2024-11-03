@@ -220,6 +220,7 @@ std::array<int,3> Large_pattern(std::vector<LCSelement> &lcs)
             }
         }
     }
+    // if no large pattern found then setting the values to 0.
     if (max_window_size < 30){
         max_window_size = 0;
         idx1 = -1;
