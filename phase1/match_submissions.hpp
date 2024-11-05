@@ -95,7 +95,7 @@ Match *upper_nonoverlap_match(std::vector<Match> &matches, Match &m, int start)
     int curr_end2 = m.end_file2;
     while (start <= end)
     {
-        int mid = start + (end - start) / 2;
+        int mid = (start+end)/2;
         if (matches[mid].start_file1 > curr_end1 && matches[mid].start_file2 > curr_end2)
         {
             end = mid - 1;
@@ -160,7 +160,7 @@ int rolling_hash(std::vector<int> &submission1, std::vector<int> &submission2)
             sub1_match.push_back(m);
             hash_set.erase(it);  
         }
-        for (int i = 1; i < submission2.size() - match_len; i++)
+        for (int i = 1; i <= submission2.size() - match_len; i++)
         {
             //calculating the hash for the next window.
             hashed = (hashed - (submission2[i - 1] * x % PRIME) + PRIME) % PRIME;
