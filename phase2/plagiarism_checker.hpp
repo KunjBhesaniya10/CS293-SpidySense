@@ -11,13 +11,16 @@ class plagiarism_checker_t {
     // You should NOT modify the public interface of this class.
 public:
     plagiarism_checker_t(void);
-    plagiarism_checker_t(std::vector<std::shared_ptr<submission_t>> 
-                            __submissions);
+    plagiarism_checker_t(std::vector<std::shared_ptr<submission_t>> __submissions);
     ~plagiarism_checker_t(void);
     void add_submission(std::shared_ptr<submission_t> __submission);
 
 protected:
     // TODO: Add members and function signatures here
-    
+    std::vector<std::pair<std::shared_ptr<submission_t>,std::chrono::time_point<std::chrono::system_clock>> submissions;
+    void check_plagiarism_init();
+    void check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2);
+    std::vector<std::thread> threads;
+    std::mutex mtx;
     // End TODO
 };
