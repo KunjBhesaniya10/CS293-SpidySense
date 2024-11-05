@@ -1,5 +1,10 @@
 #include "structures.hpp"
 // -----------------------------------------------------------------------------
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <memory>
+#include <functional>
 
 // You are free to add any STL includes above this comment, below the --line--.
 // DO NOT add "using namespace std;" or include any other files/libraries.
@@ -17,9 +22,8 @@ public:
 
 protected:
     // TODO: Add members and function signatures here
-    std::vector<std::pair<std::shared_ptr<submission_t>,std::chrono::time_point<std::chrono::system_clock>> submissions;
-    void check_plagiarism_init();
-    void check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2);
+    std::vector<std::pair<std::shared_ptr<submission_t>,std::chrono::time_point<std::chrono::system_clock>>> submissions;
+    static void check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both = false);
     std::vector<std::thread> threads;
     std::mutex mtx;
     // End TODO

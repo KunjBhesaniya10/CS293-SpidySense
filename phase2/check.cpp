@@ -1,6 +1,5 @@
 #include <iostream>
 #include <thread>
-#include <windows.h>
 using namespace std;
 
 void another_function(){
