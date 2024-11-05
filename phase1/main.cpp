@@ -37,5 +37,13 @@ int main(void) {
 
     std::cout<<"Testcase 3: "<<std::endl;
     execute_and_verify_testcase("testcases/three");
+    std::cout<<"Testcase 4: "<<std::endl;
+    execute_and_verify_testcase("testcases/four_drj");
+    std::cout<<"Testcase 5: "<<std::endl;
+    execute_and_verify_testcase("testcases/five_drj");
+    std::cout<<"Testcase 6: "<<std::endl;
+    execute_and_verify_testcase("testcases/six_drj");
+    std::cout<<"Testcase 7: "<<std::endl;
+    execute_and_verify_testcase("testcases/gpt");
     return 0;
 }
