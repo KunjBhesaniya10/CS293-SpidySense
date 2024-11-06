@@ -26,6 +26,6 @@ protected:
     void check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both = false);
     std::vector<std::thread> threads;
     std::mutex mtx;
-    void individual_plag(std::shared_ptr<submission_t>submission,std::chrono::time_point<std::chrono::system_clock> curr_time);
+    void individual_plag(std::shared_ptr<submission_t>submission);
     // End TODO
 };
