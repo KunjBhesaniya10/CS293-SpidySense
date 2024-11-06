@@ -13,16 +13,14 @@ plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submissio
 
 void plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both)
 {
+
 }
 void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submission){
     // lock(): Locks access of the submissions vector until unlocked
     std::lock_guard<std::mutex> lock(mtx);
     auto curr_time = std::chrono::system_clock::now();
     this->submissions.push_back(std::make_pair(__submission, curr_time));
-   
-
     //Multiple threads can read and write a shared pointer https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2010/c9ceah3b(v=vs.100)?redirectedfrom=MSDN
-
     for (auto other_submission: this->submissions){
         if (other_submission.second < curr_time - std::chrono::seconds(1)){
             // Reference: https://stackoverflow.com/questions/20340750/pass-multiple-arguments-into-stdthread
