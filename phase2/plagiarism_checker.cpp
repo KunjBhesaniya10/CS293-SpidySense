@@ -58,6 +58,13 @@ plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submissio
         auto tokens = tokenizer.get_tokens();
         tokenized_submissions[submission->id] = tokens;
         this->submissions.push_back(std::make_pair(submission, curr_time));
+        if (submission->id == 1){
+            std::ofstream toks("./fstreams/1_tokens.txt");
+            for (auto el: tokens){
+                toks<<el<<" ";
+            }
+            toks<<"\n";
+        }
     }
 }
 
@@ -156,7 +163,13 @@ void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submis
     std::cerr << "Submission added: " << __submission->id <<" "<< __submission->student->get_name()<< " time:"<<curr_time<< std::endl;
     tokenizer_t tokenizer(__submission->codefile);
     auto tokens = tokenizer.get_tokens();
-    if (__submission->id == 109) 
+    if (__submission->id == 109){
+        std::ofstream toks("./fstreams/109_tokens.txt");
+        for (auto el: tokens){
+            toks<<el<<" ";
+        }
+        toks<<"\n";
+    }
     tokenized_submissions[__submission->id] = tokens;
     this->submissions.push_back(std::make_pair(__submission, curr_time));
     pool.enqueue([this, __submission,curr_time]() {
