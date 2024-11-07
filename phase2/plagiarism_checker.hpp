@@ -52,6 +52,7 @@ public:
     }
 
     ~ThreadPool() {
+        std::cerr<<"Destructor called\n";
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             stop = true;
