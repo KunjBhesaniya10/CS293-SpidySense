@@ -104,10 +104,18 @@ void plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submis
                 matched[j] = true;
             }
             count++;
-            if(count >= 10) { // Check for patchwork Plag
+            if(count >= 10) { // Check if more than 10 patterns are common
                 std::lock_guard<std::mutex> lock(mtx);
-                submission1->student->flag_student(submission1);
-                submission1->professor->flag_professor(submission1);
+                if(flag_both){
+                    submission1->student->flag_student(submission1);
+                    submission2->student->flag_student(submission2);
+                    submission1->professor->flag_professor(submission1);
+                    submission2->professor->flag_professor(submission2);
+                }
+                else{
+                    submission1->student->flag_student(submission1);
+                    submission1->professor->flag_professor(submission1);
+                }
                 return;
             }
             i+=15; // Advance to next window
