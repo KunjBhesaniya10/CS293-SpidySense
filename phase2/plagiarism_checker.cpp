@@ -48,6 +48,36 @@ void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<in
     }
 }
 
+void plagiarism_checker_t::flag_them(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both, std::ofstream &curr_file){
+    std::lock_guard<std::mutex> lock(mtx);
+    if (! is_flagged[submission1->id]) {
+        if(flag_both){
+            submission1->student->flag_student(submission1);
+            is_flagged[submission1->id] =  true;
+            submission2->student->flag_student(submission2);
+            is_flagged[submission2->id] =  true;
+            submission1->professor->flag_professor(submission1);
+            submission2->professor->flag_professor(submission2);
+        }
+        else{
+            submission1->student->flag_student(submission1);
+            is_flagged[submission1->id] =  true;
+            submission1->professor->flag_professor(submission1);
+        }
+        curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
+        curr_file.close();
+    }
+    if (! is_flagged[submission2->id]){
+        if(flag_both){
+            submission2->student->flag_student(submission2);
+            is_flagged[submission2->id] =  true;
+            submission2->professor->flag_professor(submission2);
+        }
+        curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
+        curr_file.close();
+    }
+    return;
+}
 
 //------------------------------------------------------------------------->
 plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submission_t>> __submissions): pool(16) {
@@ -57,6 +87,7 @@ plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submissio
         tokenizer_t tokenizer(submission->codefile);
         auto tokens = tokenizer.get_tokens();
         tokenized_submissions[submission->id] = tokens;
+        is_flagged[submission->id] = false;
         this->submissions.push_back(std::make_pair(submission, curr_time));
         if (submission->id == 1){
             std::ofstream toks("./fstreams/1_tokens.txt");
@@ -114,28 +145,14 @@ void plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submis
                 matched[j] = true;
             }
             count++;
-            if(count >= 10) { // Check for patchwork Plag
-                std::lock_guard<std::mutex> lock(mtx);
-                submission1->student->flag_student(submission1);
-                submission1->professor->flag_professor(submission1);
-                return;
+            if(count >= 10) { // Plag with submission2
+                flag_them(submission1, submission2, flag_both, curr_file);
             }
             i+=15; // Advance to next window
             cns_size+=15;
             curr_file<<cns_size<<" ";
             if (cns_size >= 75){ // Plag with submission2
-                std::lock_guard<std::mutex> lock(mtx);
-                if(flag_both){
-                    submission1->student->flag_student(submission1);
-                    submission2->student->flag_student(submission2);
-                    submission1->professor->flag_professor(submission1);
-                    submission2->professor->flag_professor(submission2);
-                }
-                else{
-                    submission1->student->flag_student(submission1);
-                    submission1->professor->flag_professor(submission1);
-                }
-                return;
+                flag_them(submission1, submission2, flag_both, curr_file);
             }
         }
         else {
@@ -173,14 +190,15 @@ void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submis
     std::cerr << "Submission added: " << __submission->id <<" "<< __submission->student->get_name()<< " time:"<<curr_time<< std::endl;
     tokenizer_t tokenizer(__submission->codefile);
     auto tokens = tokenizer.get_tokens();
-    if (__submission->id == 109){
-        std::ofstream toks("./fstreams/109_tokens.txt");
+    if (__submission->id == 111){
+        std::ofstream toks("./fstreams/111_tokens.txt");
         for (auto el: tokens){
             toks<<el<<" ";
         }
         toks<<"\n";
     }
     tokenized_submissions[__submission->id] = tokens;
+    is_flagged[__submission->id] = false;
     this->submissions.push_back(std::make_pair(__submission, curr_time));
     pool.enqueue([this, __submission,curr_time]() {
         this->individual_plag(__submission,curr_time); // Ensure 'this' is captured for the method call

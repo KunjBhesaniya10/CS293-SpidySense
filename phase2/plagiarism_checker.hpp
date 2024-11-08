@@ -78,9 +78,11 @@ protected:
     ThreadPool pool;
     std::vector<std::pair<std::shared_ptr<submission_t>,std::chrono::time_point<std::chrono::system_clock>>> submissions;
     std::unordered_map<int,std::vector<int>> tokenized_submissions;
+    std::unordered_map<int,bool> is_flagged;
     void check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both = false);
     std::vector<std::thread> threads;
     std::mutex mtx;
     void individual_plag(std::shared_ptr<submission_t>submission,std::chrono::time_point<std::chrono::system_clock> curr_time);
+    void flag_them(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both, std::ofstream &curr_file);
     // End TODO
 };
