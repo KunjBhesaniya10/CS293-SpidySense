@@ -85,7 +85,7 @@ void plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submis
     auto tokens2 = tokenized_submissions[submission2->id];
     std::unordered_multimap<ll, int> hash_set; // Stores Hash with index
     calculate_hashes(hash_set, tokens2, 15);
-    std::pair<ll, int> hashed = hashing(tokens1, 15);
+    std::pair<ll, ll> hashed = hashing(tokens1, 15);
     ll hash = hashed.first, x = hashed.second;
     int i=0;
     int cns_size = 0; // Size of continuous match
@@ -97,6 +97,10 @@ void plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submis
         }
         auto it = hash_set.find(hash);
         if(it != hash_set.end()){ // Match Found
+            {
+                std::lock_guard<std::mutex> lock(mtx);
+                std::cerr << "Match found between " << submission1->id << " and " << submission2->id << " at " << i << std::endl;
+            }
             if(matched[it->second]) continue;
             Match m(submission1->id, submission2->id,i, i+14);
             matches.push_back(m);
