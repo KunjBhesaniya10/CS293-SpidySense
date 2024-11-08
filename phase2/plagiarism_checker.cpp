@@ -91,9 +91,15 @@ void plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submis
     int cns_size = 0; // Size of continuous match
     curr_file<<"CNS SIZE: ";
     while(i <= tokens1.size()-15){
-        if(i!=0){
+        if(i!=0 && cns_size == 0){
             hash  = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
             hash = (hash * 33 + tokens1[i + 14]) % PRIME;
+        }
+        else if (i != 0){
+            for (int k = i - 14; k<= i;k++){
+                hash = (hash - (tokens1[k - 1] * x % PRIME) + PRIME) % PRIME;
+            hash = (hash * 33 + tokens1[k + 14]) % PRIME;
+            }
         }
         auto it = hash_set.find(hash);
         if(it != hash_set.end()){ // Match Found
