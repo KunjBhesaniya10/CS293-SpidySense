@@ -1,1 +1,1 @@
-CNS SIZE: pk_100
+CNS SIZE: 15 15 pk_100

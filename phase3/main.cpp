@@ -1,5 +1,5 @@
 // #include "standard_checker.hpp"
-#include "checker_five.hpp"
+#include "checker_four.hpp"
 #include "../tokenizer.hpp"
 #include <iomanip>
 
@@ -39,7 +39,7 @@ void execute_and_verify_testcase(std::string test_dir) {
 int main(void) {
 
     std::cout<<"Testcase 1: "<<std::endl;
-    execute_and_verify_testcase("testcases/one");
+    execute_and_verify_testcase("testcases/one_org");
 
     std::cout<<"Testcase 2: "<<std::endl;
     execute_and_verify_testcase("testcases/two");

@@ -1,1 +1,1 @@
-CNS SIZE: 15 30 45 60 75 90 goti_103
+CNS SIZE: 15 goti_103
