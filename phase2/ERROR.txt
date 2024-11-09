@@ -1,0 +1,195 @@
+
+
+clang++ -std=gnu++20 -g -fsanitize=address,undefined -Wall -Wshadow -Wuninitialized -Wtype-limits -Wno-unused-variable -I/usr/lib/llvm-18/include -lclang -L/usr/lib/llvm-18/lib -rpath /usr/lib/llvm-18/lib -fuse-ld=lld main.cpp plagiarism_checker.cpp tokenizer.cpp -o main
+rm -rf *.dSYM
+./main drj_tests > output.txt
+Submission added: 100 pk time:2024-11-08 15:12:26.785442819
+id: 100MasterMatch size: 0
+Submission added: 103 goti time:2024-11-08 15:12:27.649002720
+Match found between 100 and 103 at 43
+Match found between 100 and 103 at 79
+Match found between 100 and 103 at 94
+Match found between 100 and 103 at 109
+Match found between 100 and 103 at 124
+id: 103MasterMatch size: 4
+Submission added: 109 Dt time:2024-11-08 15:12:30.432218070
+Match found between 109 and 100 at 30
+Match found between 109 and 100 at 79
+Match found between 109 and 103 at 30
+Match found between 109 and 103 at 79
+id: 109MasterMatch size: 2
+Submission added: 110 krishna time:2024-11-08 15:12:31.690258991
+Match found between 110 and 109 at 39
+Match found between 110 and 109 at 84
+Match found between 110 and 103 at 0
+Match found between 110 and 100 at 36
+Match found between 110 and 103 at 15
+Match found between 110 and 100 at 81
+Match found between 110 and 103 at 30
+Match found between 110 and 103 at 45
+Match found between 110 and 103 at 60
+Match found between 110 and 103 at 75
+Match found between 110 and 103 at 90
+id: 110MasterMatch size: 8
+Submission added: 111 akg time:2024-11-08 15:12:32.353956715
+id: 111MasterMatch size: 0
+Submission added: 131 sunita time:2024-11-08 15:12:33.980757227
+Match found between 131 and 109 at 98
+Match found between 131 and 103 at 97
+Match found between 131 and 110 at 97
+Match found between 131 and 100 at 22
+Match found between 131 and 100 at 75
+Match found between 131 and 100 at 97
+id: 131MasterMatch size: 6
+Submission added: 132 soyandeep time:2024-11-08 15:12:34.566224947
+id: 132MasterMatch size: 0
+Submission added: 112 bhashkie time:2024-11-08 15:12:35.107335810
+Match found between 112 and 100 at 0
+Match found between 112 and 100 at 15
+Match found between 112 and 100 at 30
+Match found between 112 and 100 at 45
+Match found between 112 and 100 at 60
+Match found between 112 and 100 at 157
+Match found between 112 and 131 at 157
+Match found between 112 and 110 at 43
+Match found between 112 and 110 at 157
+Match found between 112 and 103 at 43
+Match found between 112 and 103 at 67
+Match found between 112 and 103 at 157
+Destructor called
+=================================================================
+==39==ERROR: AddressSanitizer: heap-use-after-free on address 0x50b000000a08 at pc 0x562e4e5d629b bp 0x7f8b854fc3f0 sp 0x7f8b854fc3e8
+READ of size 8 at 0x50b000000a08 thread T2
+    #0 0x562e4e5d629a in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_find_before_node(unsigned long, int const&, unsigned long) const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:1954:34
+    #1 0x562e4e5d55ec in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_find_node(unsigned long, int const&, unsigned long) const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:815:31
+    #2 0x562e4e5d4dbc in std::__detail::_Map_base<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](int&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable_policy.h:842:30
+    #3 0x562e4e4afec4 in std::unordered_map<int, std::vector<int, std::allocator<int>>, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>>::operator[](int&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/unordered_map.h:991:16
+    #4 0x562e4e49709c in plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t>, std::shared_ptr<submission_t>, bool) /plagiarism_checker/phase2/plagiarism_checker.cpp:132:31
+    #5 0x562e4e49f3c3 in plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0::operator()() const /plagiarism_checker/phase2/plagiarism_checker.cpp:199:30
+    #6 0x562e4e49f1d3 in std::vector<Match, std::allocator<Match>> std::__invoke_impl<std::vector<Match, std::allocator<Match>>, plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0&>(std::__invoke_other, plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:61:14
+    #7 0x562e4e49f0b3 in std::enable_if<is_invocable_r_v<std::vector<Match, std::allocator<Match>>, plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0&>, std::vector<Match, std::allocator<Match>>>::type std::__invoke_r<std::vector<Match, std::allocator<Match>>, plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0&>(plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:114:9
+    #8 0x562e4e49e9ef in std::_Function_handler<std::vector<Match, std::allocator<Match>> (), plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l>>>)::$_0>::_M_invoke(std::_Any_data const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_function.h:290:9
+    #9 0x562e4e4e8f5a in std::function<std::vector<Match, std::allocator<Match>> ()>::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_function.h:591:9
+    #10 0x562e4e4e8de3 in std::vector<Match, std::allocator<Match>> std::__invoke_impl<std::vector<Match, std::allocator<Match>>, std::function<std::vector<Match, std::allocator<Match>> ()>&>(std::__invoke_other, std::function<std::vector<Match, std::allocator<Match>> ()>&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:61:14
+    #11 0x562e4e4e8d73 in std::enable_if<is_invocable_r_v<std::vector<Match, std::allocator<Match>>, std::function<std::vector<Match, std::allocator<Match>> ()>&>, std::vector<Match, std::allocator<Match>>>::type std::__invoke_r<std::vector<Match, std::allocator<Match>>, std::function<std::vector<Match, std::allocator<Match>> ()>&>(std::function<std::vector<Match, std::allocator<Match>> ()>&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:114:9
+    #12 0x562e4e4e7f70 in std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'()::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/future:1491:13
+    #13 0x562e4e4e7723 in std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/future:1409:27
+    #14 0x562e4e4e72e3 in std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter> std::__invoke_impl<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>&>(std::__invoke_other, std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:61:14     
+    #15 0x562e4e4e714b in std::enable_if<is_invocable_r_v<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>&>, std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter>>::type std::__invoke_r<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>&>(std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:114:9
+    #16 0x562e4e4e6caf in std::_Function_handler<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> (), std::__future_base::_Task_setter<std::unique_ptr<std::__future_base::_Result<std::vector<Match, std::allocator<Match>>>, std::__future_base::_Result_base::_Deleter>, std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run()::'lambda'(), std::vector<Match, std::allocator<Match>>>>::_M_invoke(std::_Any_data const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_function.h:290:9
+    #17 0x562e4e4e674a in std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_function.h:591:9
+    #18 0x562e4e4e5a54 in std::__future_base::_State_baseV2::_M_do_set(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/future:589:27
+    #19 0x562e4e4e65ca in void std::__invoke_impl<void, void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>(std::__invoke_memfun_deref, void (std::__future_base::_State_baseV2::*&&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*&&, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*&&, bool*&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:74:14
+    #20 0x562e4e4e6314 in std::__invoke_result<void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>::type std::__invoke<void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>(void (std::__future_base::_State_baseV2::*&&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*&&, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*&&, bool*&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:96:14
+    #21 0x562e4e4e6200 in void std::call_once<void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>(std::once_flag&, void (std::__future_base::_State_baseV2::*&&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*&&, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*&&, bool*&&)::'lambda'()::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/mutex:900:4
+    #22 0x562e4e4e602c in std::once_flag::_Prepare_execution::_Prepare_execution<void std::call_once<void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>(std::once_flag&, void (std::__future_base::_State_baseV2::*&&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*&&, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*&&, bool*&&)::'lambda'()>(void (std::__future_base::_State_baseV2::*&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*))::'lambda'()::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/mutex:836:21
+    #23 0x562e4e4e5f5b in std::once_flag::_Prepare_execution::_Prepare_execution<void std::call_once<void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>(std::once_flag&, void (std::__future_base::_State_baseV2::*&&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*&&, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*&&, bool*&&)::'lambda'()>(void (std::__future_base::_State_baseV2::*&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*))::'lambda'()::__invoke() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/mutex:836:16
+    #24 0x7f8b9222eec2 in __pthread_once_slow nptl/pthread_once.c:116:7
+    #25 0x562e4e49e65e in __gthread_once(int*, void (*)()) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:700:12
+    #26 0x562e4e4e5799 in void std::call_once<void (std::__future_base::_State_baseV2::*)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*>(std::once_flag&, void (std::__future_base::_State_baseV2::*&&)(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*, bool*), std::__future_base::_State_baseV2*&&, std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>*&&, bool*&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/mutex:907:21
+    #27 0x562e4e4e4d66 in std::__future_base::_State_baseV2::_M_set_result(std::function<std::unique_ptr<std::__future_base::_Result_base, std::__future_base::_Result_base::_Deleter> ()>, bool) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/future:428:2
+    #28 0x562e4e4e1737 in std::__future_base::_Task_state<std::function<std::vector<Match, std::allocator<Match>> ()>, std::allocator<int>, std::vector<Match, std::allocator<Match>> ()>::_M_run() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/future:1494:8
+    #29 0x562e4e4f5385 in std::packaged_task<std::vector<Match, std::allocator<Match>> ()>::operator()() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/future:1628:12
+    #30 0x562e4e4f5104 in ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()::operator()() const /plagiarism_checker/phase2/./plagiarism_checker.hpp:72:36
+    #31 0x562e4e4f5030 in void std::__invoke_impl<void, ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()&>(std::__invoke_other, ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:61:14
+    #32 0x562e4e4f4f20 in std::enable_if<is_invocable_r_v<void, ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()&>, void>::type std::__invoke_r<void, ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()&>(ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:111:2
+    #33 0x562e4e4f473c in std::_Function_handler<void (), ThreadPool::enqueue1(std::function<std::vector<Match, std::allocator<Match>> ()>)::'lambda'()>::_M_invoke(std::_Any_data const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_function.h:290:9
+    #34 0x562e4e4c52a7 in std::function<void ()>::operator()() const /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_function.h:591:9
+    #35 0x562e4e4c4755 in ThreadPool::ThreadPool(unsigned long)::'lambda'()::operator()() const /plagiarism_checker/phase2/./plagiarism_checker.hpp:50:21
+    #36 0x562e4e4c42e0 in void std::__invoke_impl<void, ThreadPool::ThreadPool(unsigned long)::'lambda'()>(std::__invoke_other, ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:61:14
+    #37 0x562e4e4c41d0 in std::__invoke_result<ThreadPool::ThreadPool(unsigned long)::'lambda'()>::type std::__invoke<ThreadPool::ThreadPool(unsigned long)::'lambda'()>(ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/invoke.h:96:14
+    #38 0x562e4e4c4174 in void std::thread::_Invoker<std::tuple<ThreadPool::ThreadPool(unsigned long)::'lambda'()>>::_M_invoke<0ul>(std::_Index_tuple<0ul>) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_thread.h:292:13
+    #39 0x562e4e4c40b8 in std::thread::_Invoker<std::tuple<ThreadPool::ThreadPool(unsigned long)::'lambda'()>>::operator()() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_thread.h:299:11    
+    #40 0x562e4e4c3e68 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<ThreadPool::ThreadPool(unsigned long)::'lambda'()>>>::_M_run() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_thread.h:244:13
+    #41 0x7f8b925b7db3  (/lib/x86_64-linux-gnu/libstdc++.so.6+0xecdb3) (BuildId: ca77dae775ec87540acd7218fa990c40d1c94ab1)
+    #42 0x562e4e4268fc in asan_thread_start(void*) crtstuff.c
+    #43 0x7f8b92229a93 in start_thread nptl/pthread_create.c:447:8
+    #44 0x7f8b922b6c3b in clone3 misc/../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x50b000000a08 is located 40 bytes inside of 104-byte region [0x50b0000009e0,0x50b000000a48)
+freed by thread T0 here:
+    #0 0x562e4e467d31 in operator delete(void*) (/plagiarism_checker/phase2/main+0x237d31) (BuildId: 5fc4a78828cc7e95)
+    #1 0x562e4e4d15ae in std::__new_allocator<std::__detail::_Hash_node_base*>::deallocate(std::__detail::_Hash_node_base**, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/new_allocator.h:172:2
+    #2 0x562e4e4d242b in std::allocator<std::__detail::_Hash_node_base*>::deallocate(std::__detail::_Hash_node_base**, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/allocator.h:210:25
+    #3 0x562e4e4d242b in std::allocator_traits<std::allocator<std::__detail::_Hash_node_base*>>::deallocate(std::allocator<std::__detail::_Hash_node_base*>&, std::__detail::_Hash_node_base**, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/alloc_traits.h:517:13
+    #4 0x562e4e4d242b in std::__detail::_Hashtable_alloc<std::allocator<std::__detail::_Hash_node<std::pair<int const, std::vector<int, std::allocator<int>>>, false>>>::_M_deallocate_buckets(std::__detail::_Hash_node_base**, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable_policy.h:2059:7
+    #5 0x562e4e4d2139 in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_deallocate_buckets(std::__detail::_Hash_node_base**, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:451:21
+    #6 0x562e4e4d18de in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_deallocate_buckets() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:456:9
+    #7 0x562e4e4d1671 in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::~_Hashtable() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:1609:7
+    #8 0x562e4e4b1fd8 in std::unordered_map<int, std::vector<int, std::allocator<int>>, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>>::~unordered_map() /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/unordered_map.h:109:11
+    #9 0x562e4e49e2af in plagiarism_checker_t::~plagiarism_checker_t() /plagiarism_checker/phase2/plagiarism_checker.cpp:248:1
+    #10 0x562e4e46d89a in testcase::execute_testcase(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>) /plagiarism_checker/phase2/main.cpp:105:1
+    #11 0x562e4e46dd9f in main /plagiarism_checker/phase2/main.cpp:108:5
+    #12 0x7f8b921b71c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #13 0x7f8b921b728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #14 0x562e4e38dfc4 in _start (/plagiarism_checker/phase2/main+0x15dfc4) (BuildId: 5fc4a78828cc7e95)       
+
+previously allocated by thread T0 here:
+    #0 0x562e4e4674b1 in operator new(unsigned long) (/plagiarism_checker/phase2/main+0x2374b1) (BuildId: 5fc4a78828cc7e95)
+    #1 0x562e4e50541f in std::__new_allocator<std::__detail::_Hash_node_base*>::allocate(unsigned long, void const*) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/new_allocator.h:151:27
+    #2 0x562e4e5d9a8e in std::allocator<std::__detail::_Hash_node_base*>::allocate(unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/allocator.h:198:32
+    #3 0x562e4e5d9a8e in std::allocator_traits<std::allocator<std::__detail::_Hash_node_base*>>::allocate(std::allocator<std::__detail::_Hash_node_base*>&, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/alloc_traits.h:482:20
+    #4 0x562e4e5d9a8e in std::__detail::_Hashtable_alloc<std::allocator<std::__detail::_Hash_node<std::pair<int const, std::vector<int, std::allocator<int>>>, false>>>::_M_allocate_buckets(unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable_policy.h:2044:20
+    #5 0x562e4e5d986f in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_allocate_buckets(unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:442:28
+    #6 0x562e4e5d8c33 in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_rehash_aux(unsigned long, std::integral_constant<bool, true>) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:2586:37
+    #7 0x562e4e5d7f74 in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_rehash(unsigned long, unsigned long const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:2565:4  
+    #8 0x562e4e5d5ba4 in std::_Hashtable<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>>::_M_insert_unique_node(unsigned long, unsigned long, std::__detail::_Hash_node<std::pair<int const, std::vector<int, std::allocator<int>>>, false>*, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable.h:2179:4
+    #9 0x562e4e5d5161 in std::__detail::_Map_base<int, std::pair<int const, std::vector<int, std::allocator<int>>>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](int&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/hashtable_policy.h:852:9
+    #10 0x562e4e4afec4 in std::unordered_map<int, std::vector<int, std::allocator<int>>, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, std::vector<int, std::allocator<int>>>>>::operator[](int&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/unordered_map.h:991:16
+    #11 0x562e4e49d713 in plagiarism_checker_t::add_submission(std::shared_ptr<submission_t>) /plagiarism_checker/phase2/plagiarism_checker.cpp:238:5
+    #12 0x562e4e46d64f in testcase::execute_testcase(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>) /plagiarism_checker/phase2/main.cpp:102:17
+    #13 0x562e4e46dd9f in main /plagiarism_checker/phase2/main.cpp:108:5
+    #14 0x7f8b921b71c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #15 0x7f8b921b728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #16 0x562e4e38dfc4 in _start (/plagiarism_checker/phase2/main+0x15dfc4) (BuildId: 5fc4a78828cc7e95)       
+
+Thread T2 created by T0 here:
+    #0 0x562e4e40e785 in pthread_create (/plagiarism_checker/phase2/main+0x1de785) (BuildId: 5fc4a78828cc7e95)
+    #1 0x7f8b925b7eb0 in std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State>>, void (*)()) (/lib/x86_64-linux-gnu/libstdc++.so.6+0xeceb0) (BuildId: ca77dae775ec87540acd7218fa990c40d1c94ab1)
+    #2 0x562e4e4c36c9 in std::thread::thread<ThreadPool::ThreadPool(unsigned long)::'lambda'(), void>(ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_thread.h:164:2
+    #3 0x562e4e4c34dc in decltype(::new((void*)(0)) std::thread(std::declval<ThreadPool::ThreadPool(unsigned long)::'lambda'()>())) std::construct_at<std::thread, ThreadPool::ThreadPool(unsigned long)::'lambda'()>(std::thread*, ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_construct.h:97:39
+    #4 0x562e4e4c25b2 in void std::allocator_traits<std::allocator<std::thread>>::construct<std::thread, ThreadPool::ThreadPool(unsigned long)::'lambda'()>(std::allocator<std::thread>&, std::thread*, ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/alloc_traits.h:540:4
+    #5 0x562e4e4c25b2 in void std::vector<std::thread, std::allocator<std::thread>>::_M_realloc_insert<ThreadPool::ThreadPool(unsigned long)::'lambda'()>(__gnu_cxx::__normal_iterator<std::thread*, std::vector<std::thread, std::allocator<std::thread>>>, ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/vector.tcc:468:4
+    #6 0x562e4e4bf947 in std::thread& std::vector<std::thread, std::allocator<std::thread>>::emplace_back<ThreadPool::ThreadPool(unsigned long)::'lambda'()>(ThreadPool::ThreadPool(unsigned long)::'lambda'()&&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/vector.tcc:123:4
+    #7 0x562e4e4af32d in ThreadPool::ThreadPool(unsigned long) /plagiarism_checker/phase2/./plagiarism_checker.hpp:38:21
+    #8 0x562e4e494d7a in plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submission_t>, std::allocator<std::shared_ptr<submission_t>>>) /plagiarism_checker/phase2/plagiarism_checker.cpp:102:103    
+    #9 0x562e4e46cc2c in testcase::execute_testcase(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>) /plagiarism_checker/phase2/main.cpp:86:26
+    #10 0x562e4e46dd9f in main /plagiarism_checker/phase2/main.cpp:108:5
+    #11 0x7f8b921b71c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7f8b921b728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x562e4e38dfc4 in _start (/plagiarism_checker/phase2/main+0x15dfc4) (BuildId: 5fc4a78828cc7e95)       
+
+SUMMARY: AddressSanitizer: heap-use-after-free /plagiarism_checker/phase2/plagiarism_checker.cpp:132:31 in plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t>, std::shared_ptr<submission_t>, bool)       
+Shadow bytes around the buggy address:
+  0x50b000000780: 00 fa fa fa fa fa fa fa fa fa 00 00 00 00 00 00
+  0x50b000000800: 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa fa
+  0x50b000000880: 00 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa
+  0x50b000000900: fa fa fa fa fa fa 00 00 00 00 00 00 00 00 00 00
+  0x50b000000980: 00 00 00 fa fa fa fa fa fa fa fa fa fd fd fd fd
+=>0x50b000000a00: fd[fd]fd fd fd fd fd fd fd fa fa fa fa fa fa fa
+  0x50b000000a80: fa fa fd fd fd fd fd fd fd fd fd fd fd fd fd fa
+  0x50b000000b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==39==ABORTING
+make: *** [Makefile:10: main] Error 1
