@@ -158,6 +158,8 @@ std::array<int, 3> match_detector::find_longest_approx_match(
 std::array<int, 5> match_submissions(std::vector<int> &submission1, 
         std::vector<int> &submission2) {
     // TODO: Write your code here
+    std::cerr<<"Submission1 size: "<<submission1.size()<<std::endl;
+    std::cerr<<"Submission2 size: "<<submission2.size()<<std::endl;
     std::array<int, 5> result = {0, 0, 0, 0, 0};
     std::span<int> sub1_span = std::span(submission1);
     std::span<int> sub2_span = std::span(submission2);
