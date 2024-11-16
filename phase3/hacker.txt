@@ -1,0 +1,2 @@
+testcases/two Hacked:
+checker_three (giving plag shouldn't give)
