@@ -141,6 +141,7 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
     int i=0;
     int cns_size = 0; // Size of continuous match
     curr_file<<"CNS SIZE: ";
+
     while(i <= tokens1.size()-15){
         if(i!=0 && cns_size == 0){
             hash  = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
@@ -179,8 +180,11 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
             }
         }
         else {
+            
             i++; // Advance to next index if match not found at current
+            
             cns_size = 0;
+
         }
     }
     curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
