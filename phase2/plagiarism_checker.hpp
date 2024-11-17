@@ -30,7 +30,13 @@ struct Match{
     Match(long subID, long MatchingTo, int start, int end,int start2, int end2): subID(subID), MatchingTo(MatchingTo), start(start), end(end) , start2(start2), end2(end2){}
 };
 
-// thread pool class to handle the threads. the
+// thread pool class to handle the threads. It is initialized with 16 threads. Implementing thread pool 
+// saves from the overhead of creating and destroying threads. A queue is maintained to store the tasks 
+// and threads are assigned tasks from the queue. when thread is done with one task, it waits until queue notifies it.
+// when the queue is empty and stop is true, the threads exits.
+// following references are used to implement thread pool.
+//REFERENCE: https://medium.com/@bhushanrane1992/getting-started-with-c-thread-pool-b6d1102da99a
+// https://www.youtube.com/watch?v=u7ouCuieBhI
 class ThreadPool {
     std::vector<std::thread> threads;
     std::queue<std::function<void()>> tasks;
@@ -59,40 +65,24 @@ public:
         }
     }
 
-//make template function to handle the different types of functions return types
 
-    template<class F>
+template<class F>
 auto enqueue(F f) -> std::future<typename std::invoke_result<F>::type> {
     using return_type = typename std::invoke_result<F>::type;
-
-    // Wrap the callable into a packaged_task
     auto task = std::make_shared<std::packaged_task<return_type()>>(std::move(f));
-
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
         tasks.emplace([task]() { (*task)(); });        
     }
-
     condition.notify_one();
     return task->get_future();
 }
-    std::future<std::vector<Match>> enqueue1(std::function<std::vector<Match>()> f) {
-        auto task = std::make_shared<std::packaged_task<std::vector<Match>()>>(f);
-
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            tasks.emplace([task] { (*task)(); });        
-        }
-            condition.notify_one();
-        return task->get_future();
-    }
 
     ~ThreadPool() {
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             stop = true;
         }
-        
         condition.notify_all();
         for (std::thread &worker : threads) {
             if(worker.joinable()){
