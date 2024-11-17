@@ -80,15 +80,12 @@ public:
             std::unique_lock<std::mutex> lock(queue_mutex);
             stop = true;
         }
-        {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        std::cerr << "thread size : "<< threads.size() << std::endl;
-        }
+        
         condition.notify_all();
         for (std::thread &worker : threads) {
-        std::cerr<<"Destructor called\n";
-            if(worker.joinable())
+            if(worker.joinable()){
             worker.join();
+            }
         }
     }
 };

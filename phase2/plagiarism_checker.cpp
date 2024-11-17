@@ -56,6 +56,7 @@ std::pair<ll, int> hashing(std::vector<int> text, int len)
 }
 void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<int> &text, ll len)
 {
+
     std::pair<ll, int> first_hash = hashing(text, len);
     ll hashed = first_hash.first, x = first_hash.second;
     hash_set.insert({hashed, 0});
@@ -72,26 +73,26 @@ void plagiarism_checker_t::flag_them(std::shared_ptr<submission_t> submission1, 
     if (! is_flagged[submission1->id]) {
         if(flag_both){
             
-            submission1->student->flag_student(submission1);
+            if(submission1->student) submission1->student->flag_student(submission1);
             is_flagged[submission1->id] =  true;
-            submission1->professor->flag_professor(submission1);
-            submission2->student->flag_student(submission2);
+            if(submission1->professor) submission1->professor->flag_professor(submission1);
+            if(submission2->student) submission2->student->flag_student(submission2);
             is_flagged[submission2->id] =  true;
-            submission2->professor->flag_professor(submission2);
+            if(submission2->professor) submission2->professor->flag_professor(submission2);
         }
         else{
-            submission1->student->flag_student(submission1);
+            if(submission1->student) submission1->student->flag_student(submission1);
             is_flagged[submission1->id] =  true;
-            submission1->professor->flag_professor(submission1);
+            if(submission1->professor) submission1->professor->flag_professor(submission1);
         }
         curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
         curr_file.close();
     }
     if (! is_flagged[submission2->id]){
         if(flag_both){
-            submission2->student->flag_student(submission2);
+            if(submission2->student) submission2->student->flag_student(submission2);
             is_flagged[submission2->id] =  true;
-            submission2->professor->flag_professor(submission2);
+            if(submission2->professor) submission2->professor->flag_professor(submission2);
         }
         curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
         curr_file.close();
