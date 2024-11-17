@@ -8,7 +8,7 @@ main: main.cpp plagiarism_checker.cpp tokenizer.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDEFLAGS) $(LDFLAGS) $^ -o $@
 	rm -rf *.dSYM
 	./main hogwarts > output.txt
-	# diff -Bw hogwarts/expected.txt output.txt
+	diff -Bw hogwarts/expected.txt output.txt
 
 clean:
 	rm -rf main output.txt *.dSYM

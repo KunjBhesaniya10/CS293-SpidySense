@@ -1,46 +1,73 @@
 #include "plagiarism_checker.hpp"
 
 #define PRIME 1000000007LL
-#define ll long long int 
+#define ll long long int
 // You should NOT add ANY other includes to this file.
 // Do NOT add "using namespace std;".
 
 // TODO: Implement the methods of the plagiarism_checker_t class
 // Add Original Submissions without checking plagiarism between them
 
+
+//------------------------------------------------------------------------------------------------>
+
+plagiarism_checker_t::plagiarism_checker_t(void) : pool(16) {}
+
+plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submission_t>> __submissions) : pool(16)
+{
+    std::chrono::time_point<std::chrono::system_clock> curr_time{}; // Initialize to Epoch Time
+    for (auto submission : __submissions)
+    {
+        std::cerr << "Submission added: " << submission->id << " " << submission->student->get_name() << " time:" << curr_time << std::endl;
+        tokenizer_t tokenizer(submission->codefile);
+        auto tokens = tokenizer.get_tokens();
+        tokenized_submissions[submission->id] = tokens;
+        is_flagged[submission->id] = false;
+        this->submissions.push_back(std::make_pair(submission, curr_time));
+    }
+}
+
 // pattern matching -------------------------------------------------->
-/// @brief To store matchings
-
-
+// comparator for sorting the intervals
 bool cmp(Match &a, Match &b)
 {
     return a.end < b.end;
 }
+
+/// @brief  Function to check for patchwork plagiarism by checking if for a particular submission,
+// there are more than 20 matches with different submissions.
+/// @param intervals
+/// @return true if patchwork plagiarism is detected, false otherwise.
 bool patchWork(std::vector<Match> &intervals)
 {
-    if(intervals.size()==0) return 0;
+    if (intervals.size() == 0)
+        return 0;
     sort(intervals.begin(), intervals.end(), cmp);
     int lastEnd = intervals[0].end;
-    int matchID=intervals[0].MatchingTo;
-    int cnt = 1;
-    int cnt1=1;
+    int matchID = intervals[0].MatchingTo;
+    int match_count = 1;
+    int file_count = 1;
     for (int i = 1; i < intervals.size(); i++)
     {
         if (intervals[i].start > lastEnd)
         {
-            cnt++;
-            if(intervals[i].MatchingTo!=matchID) {
-                cnt1++;
+            match_count++;
+            if (intervals[i].MatchingTo != matchID)
+            {
+                file_count++;
             }
             lastEnd = intervals[i].end;
         }
     }
-    if(cnt >= 20 && cnt1!=1) return 1;
-    else return 0;
+    if (match_count >= 20 && file_count != 1)
+        return 1;
+    else
+        return 0;
 }
+
 /// @brief Calculates the hash of given text
-/// @param text 
-/// @param len 
+/// @param text
+/// @param len
 /// @return {hash, hash_param}
 std::pair<ll, int> hashing(std::vector<int> text, int len)
 {
@@ -54,6 +81,10 @@ std::pair<ll, int> hashing(std::vector<int> text, int len)
     hashed = hashed % PRIME;
     return {hashed, x};
 }
+/// @brief calculates the hashes of all the substrings of length len using rolling hash technique.
+/// @param hash_set
+/// @param text
+/// @param len
 void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<int> &text, ll len)
 {
 
@@ -68,192 +99,216 @@ void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<in
     }
 }
 
-void plagiarism_checker_t::flag_them(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both, std::ofstream &curr_file){
+/// @brief Function to flag the submissions if plagiarism is detected.
+/// @param submission1
+/// @param submission2
+/// @param flag_both flag_both = 1 if both submissions are to be flagged, 0 if only submission1 is to be flagged.
+/// @param curr_file
+void plagiarism_checker_t::flag_them(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both)
+{
     std::lock_guard<std::mutex> lock(mtx);
-    if (! is_flagged[submission1->id]) {
-        if(flag_both){
-            
-            if(submission1->student) submission1->student->flag_student(submission1);
-            is_flagged[submission1->id] =  true;
-            if(submission1->professor) submission1->professor->flag_professor(submission1);
-            if(submission2->student) submission2->student->flag_student(submission2);
-            is_flagged[submission2->id] =  true;
-            if(submission2->professor) submission2->professor->flag_professor(submission2);
-        }
-        else{
-            if(submission1->student) submission1->student->flag_student(submission1);
-            is_flagged[submission1->id] =  true;
-            if(submission1->professor) submission1->professor->flag_professor(submission1);
-        }
-        curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
-        curr_file.close();
+    if (!is_flagged[submission1->id])
+    {
+        if (submission1->student)
+            submission1->student->flag_student(submission1);
+        is_flagged[submission1->id] = true;
+        if (submission1->professor)
+            submission1->professor->flag_professor(submission1);
     }
-    if (! is_flagged[submission2->id]){
-        if(flag_both){
-            if(submission2->student) submission2->student->flag_student(submission2);
-            is_flagged[submission2->id] =  true;
-            if(submission2->professor) submission2->professor->flag_professor(submission2);
-        }
-        curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
-        curr_file.close();
+    if (!is_flagged[submission2->id] && flag_both)
+    {
+        if (submission2->student)
+            submission2->student->flag_student(submission2);
+        if (submission2->professor)
+            submission2->professor->flag_professor(submission2);
+        is_flagged[submission2->id] = true;
     }
     return;
 }
 
-//------------------------------------------------------------------------->
-plagiarism_checker_t::plagiarism_checker_t(std::vector<std::shared_ptr<submission_t>> __submissions): pool(16) {
-    std::chrono::time_point<std::chrono::system_clock> curr_time{}; // Initialize to Epoch Time
-    for(auto submission : __submissions){
-        std::cerr << "Submission added: " << submission->id <<" "<< submission->student->get_name()<< " time:"<<curr_time<< std::endl;
-        tokenizer_t tokenizer(submission->codefile);
-        auto tokens = tokenizer.get_tokens();
-        tokenized_submissions[submission->id] = tokens;
-        is_flagged[submission->id] = false;
-        this->submissions.push_back(std::make_pair(submission, curr_time));
-        if (submission->id == 1){
-            std::ofstream toks("./fstreams/1_tokens.txt");
-            for (auto el: tokens){
-                toks<<el<<" ";
-            }
-            toks<<"\n";
+/// @brief Function to handle and merge continuous matches when new match is found.
+void handle_and_merge_matches(std::vector<Match> &final_matches, std::stack<Match> &matches_stack, int &continuous_size,
+                              int &match_count, std::vector<bool> &matched, bool flag_both, std::shared_ptr<submission_t> submission1,
+                              std::shared_ptr<submission_t> submission2, int &i, int &start_idx_file2)
+{
+    if (matches_stack.empty())
+    {
+        matches_stack.push({submission1->id, submission2->id, i, i+14, start_idx_file2, start_idx_file2+ 14});
+        continuous_size += 15;
+        match_count++;
+    }
+    else if (!matches_stack.empty())
+    {
+        Match m = matches_stack.top();
+        if (m.end + 1 == i && m.end2 + 1 == start_idx_file2)
+        {
+            continuous_size += 15;
+            matches_stack.pop();
+            matches_stack.push({submission1->id, submission2->id, m.start,i+14, m.start2, start_idx_file2+14});
         }
+        else
+        {
+            continuous_size = 15;
+            match_count++;
+            final_matches.push_back(m);
+            matches_stack.pop();
+            matches_stack.push({submission1->id, submission2->id,i,i+14,start_idx_file2,start_idx_file2+14});
+        }
+    }
+    for (int j = start_idx_file2 ; j < start_idx_file2+14; j++){
+        matched[j] = true;
+    }
+
+}
+
+/// @brief Function to handle small matches of length less than 15 and merge them with the previous matches. if the current
+//  continuous match > 0 and next window of 15 does not matches then, this function check if less than 15 length match can
+//  be added to the previous continuous match.
+void handle_small_match(std::vector<Match> &final_matches, std::stack<Match> &matches_stack, int &continuous_size,
+                        int &match_count, std::vector<bool> &matched, std::shared_ptr<submission_t> submission1,
+                        std::shared_ptr<submission_t> submission2, int &i, std::vector<int> &tokens1, std::vector<int> &tokens2)
+{
+    if (continuous_size > 0)
+    {
+        int match_last_len = 0;
+        Match m = matches_stack.top();
+        matches_stack.pop();
+        for (int j = i; j < i + 14; j++)
+        {
+            if (tokens1[j] == tokens2[m.end2 + j - i])
+            {
+                match_last_len++;
+                matched[m.end2 + j - i] = true;
+            }
+            else
+                break;
+        }
+        final_matches.push_back({submission1->id, submission2->id, m.start, m.end, i + match_last_len, m.end2 + match_last_len});
+        i += match_last_len;
+        continuous_size = 0;
+    }
+    else
+    {
+        i++;
     }
 }
 
-plagiarism_checker_t::plagiarism_checker_t(void): pool(16){}
-
-std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both)
+/// @brief Function to check plagiarism between two submissions.
+/// @param submission1 this is the main submission for which plagiarism is to be checked.
+/// @param submission2 this is the submission to be checked against.
+/// @param flag_both  flag_both = 1 if both submissions are to be flagged, 0 if only submission1 is to be flagged.
+/// @return final_matches - vector of total matches found between the two submissions is returned for further patchwork check.
+std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submission_t> submission1,
+                                                          std::shared_ptr<submission_t> submission2, bool flag_both)
 {
-    // {
-    //     std::lock_guard<std::mutex> lock(mtx);
-    // std::cerr << "Checking plagiarism between " << submission1->id << " and " << submission2->id << std::endl;
-        
-    // }   
-    std::vector<Match> matches;
-    std::ofstream curr_file("./fstreams/"+submission1->student->get_name()+"_"+std::to_string(submission1->id)+"_"+submission2->student->get_name()+"_"+std::to_string(submission2->id)+".txt");
+    std::stack<Match> matches_stack;
+    std::vector<Match> final_matches;
     std::vector<bool> matched(tokenized_submissions[submission2->id].size(), false); // To store which hashes are already matched (indices of submission2)
-    int count =0;
+    int match_count = 0;
     auto tokens1 = tokenized_submissions[submission1->id];
     auto tokens2 = tokenized_submissions[submission2->id];
     std::unordered_multimap<ll, int> hash_set; // Stores Hash with index
-    calculate_hashes(hash_set, tokens2, 15);
+    calculate_hashes(hash_set, tokens2, 15);   // Calculate hashes of all substrings of length 15.
     std::pair<ll, ll> hashed = hashing(tokens1, 15);
     ll hash = hashed.first, x = hashed.second;
-    int i=0;
-    int cns_size = 0; // Size of continuous match
-    curr_file<<"CNS SIZE: ";
+    int i = 0;               // Start of window
+    int continuous_size = 0; // Size of continuous match
 
-    while(i <= tokens1.size()-15){
-        if(i!=0 && cns_size == 0){
-            hash  = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
+    while (i <= tokens1.size() - 15)
+    {
+        if (i != 0 && continuous_size == 0)
+        {
+            hash = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
             hash = (hash * 33 + tokens1[i + 14]) % PRIME;
         }
-        else if (i != 0){
-            for (int k = i - 14; k<= i;k++){
+        else if (i != 0)
+        {
+            for (int k = i - 14; k <= i; k++)
+            {
                 hash = (hash - (tokens1[k - 1] * x % PRIME) + PRIME) % PRIME;
-            hash = (hash * 33 + tokens1[k + 14]) % PRIME;
+                hash = (hash * 33 + tokens1[k + 14]) % PRIME;
             }
         }
         auto it = hash_set.find(hash);
-        if(it != hash_set.end()){ // Match Found
-            {
-                std::lock_guard<std::mutex> lock(mtx);
-                std::cerr << "Match found between " << submission1->id << " and " << submission2->id << " at " << i << std::endl;
-            }
-            if(matched[it->second]) continue;
-            Match m(submission1->id, submission2->id,i, i+cns_size+15);
-            {
-                std::lock_guard<std::mutex> lock(mtx);
-                matches.push_back(m);
-            }
-            for(int j = it->second; j < it->second+15; j++){
-                matched[j] = true;
-            }
-            if(cns_size == 0) count++;  //increase count if continuous match starts
-            if(count >= 10) { // Plag with submission2
-                flag_them(submission1, submission2, flag_both, curr_file);
-            }
-            i+=15; // Advance to next window
-            cns_size+=15;
-            curr_file<<cns_size<<" ";
-            if (cns_size >= 75){ // Plag with submission2
-                flag_them(submission1, submission2, flag_both, curr_file);
-            }
+        if (it != hash_set.end())
+        { // Match Found
+            if (matched[it->second])
+                continue;
+            handle_and_merge_matches(final_matches, matches_stack, continuous_size, match_count,
+                                     matched, flag_both, submission1, submission2,i, it->second);
+        if (match_count >= 10){
+        flag_them(submission1, submission2, flag_both);
         }
-        else {
-            
-            i++; // Advance to next index if match not found at current
-            
-            cns_size = 0;
-
+        if (continuous_size >= 75){
+        flag_them(submission1, submission2, flag_both);
+        }
+            i += 15; // Advance to next window
+        }
+        else
+        {
+            handle_small_match(final_matches, matches_stack, continuous_size, match_count, matched, submission1, submission2, i,tokens1,tokens2);
         }
     }
-    curr_file<<submission2->student->get_name()+"_"+std::to_string(submission2->id)+"\n";
-    curr_file.close();
-    return matches;
+    return final_matches;
 }
 
-
 // Multiple threads can read and write a shared pointer https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2010/c9ceah3b(v=vs.100)?redirectedfrom=MSDN
-void plagiarism_checker_t::individual_plag(std::shared_ptr<submission_t> __submission, std::chrono::time_point<std::chrono::system_clock> curr_time){
-    std::vector<Match> MasterMatch;
-    std::vector<std::future<std::vector<Match>>> futures;
-    for (auto other_submission : submissions){
-        if (other_submission.first != __submission && other_submission.second < curr_time - std::chrono::seconds(1)){
+/// @brief Function to process plagiarism check for a particular submission.
+void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<submission_t> __submission, std::chrono::time_point<std::chrono::system_clock> curr_time)
+{
+    std::vector<Match> MasterMatch;  // store all the matches with all other submissions.
+    std::vector<std::future<std::vector<Match>>> futures; 
+    for (auto other_submission : submissions)
+    {
+        if (other_submission.first != __submission && other_submission.second < curr_time - std::chrono::seconds(1))
+        {
             std::lock_guard<std::mutex> lock(mtx);
-           futures.push_back(pool.enqueue1([this, __submission, other_submission]() {
-                return this->check_plagiarism(__submission, other_submission.first, false);
-            }));
+            futures.push_back(pool.enqueue([this, __submission, other_submission]()
+                                            { return this->check_plagiarism(__submission, other_submission.first, false); }));
         }
-        else if (other_submission.second < curr_time){
+        else if (other_submission.second < curr_time)
+        {
             std::lock_guard<std::mutex> lock(mtx);
-            futures.push_back(pool.enqueue1([this, __submission, other_submission]() {
-                return this->check_plagiarism(other_submission.first, __submission, true);
-            }));
-        }      // Enqueue the task to the thread pool
-        
+            futures.push_back(pool.enqueue([this, __submission, other_submission]()
+                                            { return this->check_plagiarism(other_submission.first, __submission, true); }));
+        } // Enqueue the task to the thread pool
     }
-            for(auto &f: futures){
-                auto tmp = f.get(); // Wait for all the futures to finish
-                MasterMatch.insert(MasterMatch.end(), tmp.begin(), tmp.end());
-            }
-            std::cerr<<"id: "<<__submission->id<<"MasterMatch size: "<<MasterMatch.size()<<std::endl;
-            if(patchWork(MasterMatch)){
-                if(!is_flagged[__submission->id]){
-                    std::lock_guard<std::mutex> lock(mtx);
-                    __submission->professor->flag_professor(__submission);
-                    __submission->student->flag_student(__submission);
-                    is_flagged[__submission->id] =  true;
-                }
-            }
-            
+    for (auto &f : futures)
+    {
+        auto tmp = f.get(); // Wait for all the futures to finish.
+        MasterMatch.insert(MasterMatch.end(), tmp.begin(), tmp.end());
+    }
+    std::cerr << "id: " << __submission->id << "MasterMatch size: " << MasterMatch.size() << std::endl;
+    if (patchWork(MasterMatch))
+    {
+        if (!is_flagged[__submission->id])
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            __submission->professor->flag_professor(__submission);
+            __submission->student->flag_student(__submission);
+            is_flagged[__submission->id] = true;
+        }
+    }
     return;
 }
 
-
-void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submission){
-    // lock(): Locks access of the submissions vector until unlocked'
+void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submission)
+{
     auto curr_time = std::chrono::system_clock::now();
-    std::cerr << "Submission added: " << __submission->id <<" "<< __submission->student->get_name()<< " time:"<<curr_time<< std::endl;
+    std::cerr << "Submission added: " << __submission->id << " " << __submission->student->get_name() << " time:" << curr_time << std::endl;
     tokenizer_t tokenizer(__submission->codefile);
     auto tokens = tokenizer.get_tokens();
-    if (__submission->id == 111){
-        std::ofstream toks("./fstreams/111_tokens.txt");
-        for (auto el: tokens){
-            toks<<el<<" ";
-        }
-        toks<<"\n";
-    }
     tokenized_submissions[__submission->id] = tokens;
     is_flagged[__submission->id] = false;
     this->submissions.push_back(std::make_pair(__submission, curr_time));
-    pool.enqueue([this, __submission,curr_time]() {
-        this->individual_plag(__submission,curr_time); // Ensure 'this' is captured for the method call
-    });    
-    
+    pool.enqueue([this, __submission, curr_time]()
+                 {
+                    this->process_plagcheck_for_submission(__submission, curr_time);
+                 });
 }
 
-plagiarism_checker_t::~plagiarism_checker_t(void) {
+plagiarism_checker_t::~plagiarism_checker_t(void)
+{
     {
         std::lock_guard<std::mutex> lock(mtx);
         std::cerr << "Plag Destructor called\n";
