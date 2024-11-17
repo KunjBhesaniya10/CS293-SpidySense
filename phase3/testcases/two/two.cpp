@@ -19,7 +19,7 @@ int longestCommonSubsequence(const std::string &text1, const std::string &text2)
 }
 
 int main() {
-    std::string text1 = "ABCBDAB";
+    std::string text1 = "TYNTNTBGYNTN";
     std::string text2 = "BDCAB";
     int length = longestCommonSubsequence(text1, text2);
     std::cout << "Length of Longest Common Subsequence: " << length << std::endl;

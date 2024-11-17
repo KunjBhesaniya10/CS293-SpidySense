@@ -1,2 +1,3 @@
 testcases/two Hacked:
-checker_three (giving plag shouldn't give)
+checker_three (giving plag shouldn't give) {bug with lcs function or its thresold value in line 207}
+

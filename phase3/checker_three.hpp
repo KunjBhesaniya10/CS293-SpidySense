@@ -203,7 +203,7 @@ std::array<int, 5> match_submissions(std::vector<int> &submission1,
 
     int min  = (submission1.size()>submission2.size())? submission2.size() : submission1.size();
 
-
+    std::cerr<<submission1.size()<<" "<<submission2.size()<<std::endl;
     if( result[1] / static_cast<double>(min) >= 0.2   || result[2]/static_cast<double>(min) >= 0.3){
         result[0] = 1;
 
