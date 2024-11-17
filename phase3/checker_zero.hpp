@@ -97,9 +97,9 @@ bool match_detector::is_approx_match(
         std::span<int> sequence1, std::span<int> sequence2) {
     int len1 = sequence1.size();
     int len2 = sequence2.size();
-    if (std::max(len1, len2) > 1.1 * std::min(len1, len2)) {
-        return false;
-    }
+    // if (std::max(len1, len2) > 1.1 * std::min(len1, len2)) {
+    //     return false;
+    // }
     std::vector<std::vector<int>> longest_subseq(len1 + 1, 
             std::vector<int>(len2 + 1, 0));
     for (int i = len1; i >= 0; i--) for (int j = len2; j >= 0; j--) {
