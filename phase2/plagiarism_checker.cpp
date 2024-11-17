@@ -87,16 +87,20 @@ std::pair<ll, int> hashing(std::vector<int> text, int len)
 /// @param len
 void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<int> &text, ll len)
 {
+    std::ofstream rise("fstreams/0_hashes.txt");
 
     std::pair<ll, int> first_hash = hashing(text, len);
     ll hashed = first_hash.first, x = first_hash.second;
+    rise << hashed << " ";
     hash_set.insert({hashed, 0});
     for (int i = 1; i <= text.size() - len; i++)
     {
         hashed = (hashed - (text[i - 1] * x % PRIME) + PRIME) % PRIME;
         hashed = (hashed * 33 + text[i + len - 1]) % PRIME;
         hash_set.insert({hashed, i});
+        rise << hashed << " ";
     }
+    rise << std::endl;
 }
 
 /// @brief Function to flag the submissions if plagiarism is detected.
@@ -141,22 +145,25 @@ void handle_and_merge_matches(std::vector<Match> &final_matches, std::stack<Matc
     else if (!matches_stack.empty())
     {
         Match m = matches_stack.top();
-        if (m.end + 1 == i && m.end2 + 1 == start_idx_file2)
+        int prev_start1 = m.start; int prev_start2 = m.start2;
+        int prev_end1 = m.end; int prev_end2 = m.end2;
+        if ((m.end + 1) == i && (m.end2 + 1) == start_idx_file2)
         {
+            std::cerr << "match extended" << std::endl;
             continuous_size += 15;
             matches_stack.pop();
-            matches_stack.push({submission1->id, submission2->id, m.start,i+14, m.start2, start_idx_file2+14});
+            matches_stack.push({submission1->id, submission2->id, prev_start1,i+14, prev_start2, start_idx_file2+14});
         }
         else
         {
             continuous_size = 15;
             match_count++;
-            final_matches.push_back(m);
+            final_matches.push_back({submission1->id, submission2->id, m.start, m.end, m.start2, m.end2});
             matches_stack.pop();
             matches_stack.push({submission1->id, submission2->id,i,i+14,start_idx_file2,start_idx_file2+14});
         }
     }
-    for (int j = start_idx_file2 ; j < start_idx_file2+14; j++){
+    for (int j = start_idx_file2 ; j <= start_idx_file2+14; j++){
         matched[j] = true;
     }
 
@@ -165,32 +172,40 @@ void handle_and_merge_matches(std::vector<Match> &final_matches, std::stack<Matc
 /// @brief Function to handle small matches of length less than 15 and merge them with the previous matches. if the current
 //  continuous match > 0 and next window of 15 does not matches then, this function check if less than 15 length match can
 //  be added to the previous continuous match.
-void handle_small_match(std::vector<Match> &final_matches, std::stack<Match> &matches_stack, int &continuous_size,
+int handle_small_match(std::vector<Match> &final_matches, std::stack<Match> &matches_stack, int &continuous_size,
                         int &match_count, std::vector<bool> &matched, std::shared_ptr<submission_t> submission1,
                         std::shared_ptr<submission_t> submission2, int &i, std::vector<int> &tokens1, std::vector<int> &tokens2)
 {
     if (continuous_size > 0)
     {
+        std::cerr<<"continuous size: "<<continuous_size<<std::endl;
         int match_last_len = 0;
         Match m = matches_stack.top();
+        std::cerr<<"m.end2: "<<m.end2<<std::endl;
+        int prev_start1 = m.start; int prev_start2 = m.start2;
+        int prev_end1 = m.end; int prev_end2 = m.end2;
         matches_stack.pop();
         for (int j = i; j < i + 14; j++)
         {
-            if (tokens1[j] == tokens2[m.end2 + j - i])
+            if (tokens1[j] == tokens2[m.end2 + j - i +1])
             {
                 match_last_len++;
-                matched[m.end2 + j - i] = true;
+                matched[m.end2 + j - i+1] = true;
             }
             else
                 break;
         }
-        final_matches.push_back({submission1->id, submission2->id, m.start, m.end, i + match_last_len, m.end2 + match_last_len});
-        i += match_last_len;
+        std::cerr<<"match_last_len: "<<match_last_len<<std::endl;
+        final_matches.push_back({submission1->id, submission2->id, prev_start1, i+match_last_len-1, prev_start2, m.end2 + match_last_len});
+        if(match_last_len==0) i++;
+        else i += match_last_len;
         continuous_size = 0;
+        return match_last_len;
     }
     else
     {
         i++;
+        return 0;
     }
 }
 
@@ -210,17 +225,23 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
     auto tokens2 = tokenized_submissions[submission2->id];
     std::unordered_multimap<ll, int> hash_set; // Stores Hash with index
     calculate_hashes(hash_set, tokens2, 15);   // Calculate hashes of all substrings of length 15.
+    
+    std::ofstream fall("fstreams/100000_hashes.txt");
+    
     std::pair<ll, ll> hashed = hashing(tokens1, 15);
     ll hash = hashed.first, x = hashed.second;
+    fall << hash << " ";
     int i = 0;               // Start of window
     int continuous_size = 0; // Size of continuous match
 
     while (i <= tokens1.size() - 15)
     {
+        std::cerr << "i: " << i << std::endl;
         if (i != 0 && continuous_size == 0)
         {
             hash = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
             hash = (hash * 33 + tokens1[i + 14]) % PRIME;
+            fall << hash << " ";
         }
         else if (i != 0)
         {
@@ -228,31 +249,36 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
             {
                 hash = (hash - (tokens1[k - 1] * x % PRIME) + PRIME) % PRIME;
                 hash = (hash * 33 + tokens1[k + 14]) % PRIME;
+                fall << hash << " ";
             }
         }
-        auto it = hash_set.find(hash);
-        if (it != hash_set.end())
-        { // Match Found
 
+        auto it = hash_set.find(hash);
+        if (it != hash_set.end() && (!matched[it->second] && !matched[it->second+14]))
+        { // Match Found
+           
         {
             std::lock_guard<std::mutex> lock(mtx);
             std::cerr << "Match Found: " << submission1->id << " " << submission2->id << " " << i << " " << it->second << std::endl;
         }
-            if (matched[it->second])
-                continue;
             handle_and_merge_matches(final_matches, matches_stack, continuous_size, match_count,
                                      matched, flag_both, submission1, submission2,i, it->second);
-        if (match_count >= 10){
-        flag_them(submission1, submission2, flag_both);
-        }
-        if (continuous_size >= 75){
-        flag_them(submission1, submission2, flag_both);
-        }
+            if (match_count >= 10){
+                flag_them(submission1, submission2, flag_both);
+            }
+            if (continuous_size >= 75){
+                flag_them(submission1, submission2, flag_both);
+            }
             i += 15; // Advance to next window
         }
         else
         {
-            handle_small_match(final_matches, matches_stack, continuous_size, match_count, matched, submission1, submission2, i,tokens1,tokens2);
+            int match_len = handle_small_match(final_matches, matches_stack, continuous_size, match_count, matched, submission1, submission2, i,tokens1,tokens2);
+            for (int k = i - match_len + 1; k < i; k++)
+            {
+                hash = (hash - (tokens1[k - 1] * x % PRIME) + PRIME) % PRIME;
+                hash = (hash * 33 + tokens1[k + 14]) % PRIME;
+            }
         }
     }
     return final_matches;
@@ -263,12 +289,26 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
 void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<submission_t> __submission, std::chrono::time_point<std::chrono::system_clock> curr_time)
 {
     std::vector<Match> MasterMatch;  // store all the matches with all other submissions.
-    std::vector<std::future<std::vector<Match>>> futures; 
+    std::vector<std::future<std::vector<Match>>> futures;
     for (auto other_submission : submissions)
     {
         if(other_submission.first->id == __submission->id)
             continue;
-        if ( other_submission.second < curr_time - std::chrono::seconds(1))
+
+        std::ofstream out("fstreams/"+std::to_string(__submission->id)+"_"+std::to_string(other_submission.first->id)+".txt");
+        
+        for (auto token : tokenized_submissions[__submission->id])
+        {
+            out << token << " ";
+        }
+        out << std::endl;
+        for (auto token : tokenized_submissions[other_submission.first->id])
+        {
+            out << token << " ";
+        }
+        out << std::endl;
+
+        if ( (curr_time - other_submission.second) > std::chrono::seconds(1))
         {
             std::lock_guard<std::mutex> lock(mtx);
             futures.push_back(pool.enqueue([this, __submission, other_submission]()
