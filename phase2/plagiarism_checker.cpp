@@ -85,19 +85,19 @@ std::pair<ll, int> hashing(std::vector<int> text, int len)
 /// @param hash_set
 /// @param text
 /// @param len
-void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<int> &text, ll len)
+void calculate_hashes(std::unordered_map<ll, std::vector<int>> &hash_set, std::vector<int> &text, ll len)
 {
     std::ofstream rise("fstreams/0_hashes.txt");
 
     std::pair<ll, int> first_hash = hashing(text, len);
     ll hashed = first_hash.first, x = first_hash.second;
     rise << hashed << " ";
-    hash_set.insert({hashed, 0});
+    hash_set[hashed].push_back(0);
     for (int i = 1; i <= text.size() - len; i++)
     {
         hashed = (hashed - (text[i - 1] * x % PRIME) + PRIME) % PRIME;
         hashed = (hashed * 33 + text[i + len - 1]) % PRIME;
-        hash_set.insert({hashed, i});
+        hash_set[hashed].push_back(i);
         rise << hashed << " ";
     }
     rise << std::endl;
@@ -111,14 +111,6 @@ void calculate_hashes(std::unordered_multimap<ll, int> &hash_set, std::vector<in
 void plagiarism_checker_t::flag_them(std::shared_ptr<submission_t> submission1, std::shared_ptr<submission_t> submission2, bool flag_both)
 {
     std::lock_guard<std::mutex> lock(mtx);
-    if (!is_flagged[submission1->id])
-    {
-        if (submission1->student)
-            submission1->student->flag_student(submission1);
-        is_flagged[submission1->id] = true;
-        if (submission1->professor)
-            submission1->professor->flag_professor(submission1);
-    }
     if (!is_flagged[submission2->id] && flag_both)
     {
         std::cerr << "Flagging both: " << submission2->id << std::endl;
@@ -127,6 +119,14 @@ void plagiarism_checker_t::flag_them(std::shared_ptr<submission_t> submission1, 
         if (submission2->professor)
             submission2->professor->flag_professor(submission2);
         is_flagged[submission2->id] = true;
+    }
+    if (!is_flagged[submission1->id])
+    {
+        if (submission1->student)
+            submission1->student->flag_student(submission1);
+        is_flagged[submission1->id] = true;
+        if (submission1->professor)
+            submission1->professor->flag_professor(submission1);
     }
     return;
 }
@@ -151,6 +151,7 @@ void handle_and_merge_matches(std::vector<Match> &final_matches, std::stack<Matc
         {
             std::cerr << "match extended" << std::endl;
             continuous_size += 15;
+            match_count++;
             matches_stack.pop();
             matches_stack.push({submission1->id, submission2->id, prev_start1,i+14, prev_start2, start_idx_file2+14});
         }
@@ -187,7 +188,7 @@ int handle_small_match(std::vector<Match> &final_matches, std::stack<Match> &mat
         matches_stack.pop();
         for (int j = i; j < i + 14; j++)
         {
-            if (tokens1[j] == tokens2[m.end2 + j - i +1])
+            if ( m.end2 +j-i+1 < tokens2.size() && tokens1[j] == tokens2[m.end2 + j - i +1])
             {
                 match_last_len++;
                 matched[m.end2 + j - i+1] = true;
@@ -223,7 +224,7 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
     int match_count = 0;
     auto tokens1 = tokenized_submissions[submission1->id];
     auto tokens2 = tokenized_submissions[submission2->id];
-    std::unordered_multimap<ll, int> hash_set; // Stores Hash with index
+    std::unordered_map<ll, std::vector<int>> hash_set; // Stores Hash with index
     calculate_hashes(hash_set, tokens2, 15);   // Calculate hashes of all substrings of length 15.
     
     std::ofstream fall("fstreams/100000_hashes.txt");
@@ -236,7 +237,7 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
 
     while (i <= tokens1.size() - 15)
     {
-        std::cerr << "i: " << i << std::endl;
+        // std::cerr << "i: " << i << std::endl;
         if (i != 0 && continuous_size == 0)
         {
             hash = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
@@ -254,15 +255,28 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
         }
 
         auto it = hash_set.find(hash);
-        if (it != hash_set.end() && (!matched[it->second] && !matched[it->second+14]))
+        int start_idx_file2 = -1;
+        if(it != hash_set.end()){
+            std::vector<int> idxs = it->second;
+            for(auto idx: idxs){
+                std::cerr << "idx: " << idx << std::endl;
+                if(matched[idx] || matched[idx+14] ) continue;
+                else { 
+                    start_idx_file2 = idx;
+                    break;
+                }
+            }
+        }
+        
+        if (it != hash_set.end() && start_idx_file2 != -1)
         { // Match Found
            
         {
             std::lock_guard<std::mutex> lock(mtx);
-            std::cerr << "Match Found: " << submission1->id << " " << submission2->id << " " << i << " " << it->second << std::endl;
+            std::cerr << "Match Found: " << submission1->id << " " << submission2->id << " " << i << " " << start_idx_file2 << std::endl;
         }
             handle_and_merge_matches(final_matches, matches_stack, continuous_size, match_count,
-                                     matched, flag_both, submission1, submission2,i, it->second);
+                                     matched, flag_both, submission1, submission2,i, start_idx_file2);
             if (match_count >= 10){
                 flag_them(submission1, submission2, flag_both);
             }
@@ -279,7 +293,14 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
                 hash = (hash - (tokens1[k - 1] * x % PRIME) + PRIME) % PRIME;
                 hash = (hash * 33 + tokens1[k + 14]) % PRIME;
             }
+            // i++;
+            // continuous_size = 0;
         }
+    }
+    while(!matches_stack.empty()){
+        Match m = matches_stack.top();
+        final_matches.push_back(m);
+        matches_stack.pop();
     }
     return final_matches;
 }
@@ -330,7 +351,7 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
     {
         std::lock_guard<std::mutex> lock(mtx);
         for(auto match: MasterMatch){
-            std::cerr << "id: " << __submission->id << "Match: " << match.end-match.start+1 << " " << match.MatchingTo << std::endl;
+            std::cerr << "id: " << __submission->id << "Match: " << match.end-match.start+1 << " start1: " <<match.start<<" start2: " <<match.start2<< std::endl;
         }
     }
     if (patchWork(MasterMatch))
