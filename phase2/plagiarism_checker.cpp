@@ -310,6 +310,7 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
 void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<submission_t> __submission, std::chrono::time_point<std::chrono::system_clock> curr_time)
 {
     {
+        std::lock_guard<std::mutex> lock(mtx);
         tokenizer_t tokenizer(__submission->codefile);
         auto tokens = tokenizer.get_tokens();
         tokenized_submissions[__submission->id] = tokens;
@@ -323,35 +324,18 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
 
         std::ofstream out("fstreams/"+std::to_string(__submission->id)+"_"+std::to_string(other_submission.first->id)+".txt");
         
-        // for (auto token : tokenized_submissions[__submission->id])
-        // {
-        //     out << token << " ";
-        // }
-        // out << std::endl;
-        // for (auto token : tokenized_submissions[other_submission.first->id])
-        // {
-        //     out << token << " ";
-        // }
-        // out << std::endl;
-
         if ( (curr_time - other_submission.second) > std::chrono::seconds(1))
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            futures.push_back(pool.enqueue([this, __submission, other_submission]()
-                                            { return this->check_plagiarism(__submission, other_submission.first, false); }));
+            auto m = (check_plagiarism(__submission,other_submission.first,false));
+            MasterMatch.insert(MasterMatch.end(), m.begin(), m.end());
         }
         else if ( other_submission.second < curr_time)
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            futures.push_back(pool.enqueue([this, __submission, other_submission]()
-                                            { return this->check_plagiarism(__submission,other_submission.first, true); }));
+           auto  m = (check_plagiarism(__submission,other_submission.first,true));
+              MasterMatch.insert(MasterMatch.end(), m.begin(), m.end());
         } // Enqueue the task to the thread pool
     }
-    for (auto &f : futures)
-    {
-        auto tmp = f.get(); // Wait for all the futures to finish.
-        MasterMatch.insert(MasterMatch.end(), tmp.begin(), tmp.end());
-    }
+
     std::cerr << "id: " << __submission->id << "MasterMatch size: " << MasterMatch.size() << std::endl;
     {
         std::lock_guard<std::mutex> lock(mtx);
