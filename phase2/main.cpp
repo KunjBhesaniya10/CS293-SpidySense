@@ -91,7 +91,9 @@ void testcase::execute_testcase(std::string __test_dir) {
     std::string student_name;
     std::string prof_name;
     std::string code_file;
+    int i=0;
     while (in >> timestamp >> id >> student_name >> prof_name >> code_file) {
+        i++;
         usleep((timestamp - old_timestamp) * 1000000);
         std::shared_ptr<submission_t> submission = 
             std::make_shared<submission_t>();
@@ -102,6 +104,7 @@ void testcase::execute_testcase(std::string __test_dir) {
         checker.add_submission(submission);
         old_timestamp = timestamp;
     }
+    std::cerr<<"Total submissions: "<<i<<std::endl;
 }
 
 int main(int argc, char** argv) {

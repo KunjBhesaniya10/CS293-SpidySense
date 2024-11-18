@@ -59,6 +59,10 @@ public:
                         task = std::move(tasks.front());
                         tasks.pop();
                     }
+                    {
+                    std::lock_guard<std::mutex> lock(queue_mutex);
+                    std::cerr<<"doing some task"<<std::endl;
+                    }
                     task();
                 }
             });
@@ -80,7 +84,7 @@ auto enqueue(F f) -> std::future<typename std::invoke_result<F>::type> {
 
     ~ThreadPool() {
         {
-            std::unique_lock<std::mutex> lock(queue_mutex);
+            std::lock_guard<std::mutex> lock(queue_mutex);
             stop = true;
         }
         condition.notify_all();
@@ -102,10 +106,9 @@ public:
 
 protected:
     // TODO: Add members and function signatures here
-    std::vector<std::thread> threads;
+    std::unordered_map<int,std::vector<int>> tokenized_submissions;
     std::mutex mtx;
     std::vector<std::pair<std::shared_ptr<submission_t>,std::chrono::time_point<std::chrono::system_clock>>> submissions;
-    std::unordered_map<int,std::vector<int>> tokenized_submissions;
     std::unordered_map<int,bool> is_flagged;
     ThreadPool pool;
 

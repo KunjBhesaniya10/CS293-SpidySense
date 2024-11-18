@@ -309,6 +309,11 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
 /// @brief Function to process plagiarism check for a particular submission.
 void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<submission_t> __submission, std::chrono::time_point<std::chrono::system_clock> curr_time)
 {
+    {
+        tokenizer_t tokenizer(__submission->codefile);
+        auto tokens = tokenizer.get_tokens();
+        tokenized_submissions[__submission->id] = tokens;
+    }
     std::vector<Match> MasterMatch;  // store all the matches with all other submissions.
     std::vector<std::future<std::vector<Match>>> futures;
     for (auto other_submission : submissions)
@@ -318,16 +323,16 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
 
         std::ofstream out("fstreams/"+std::to_string(__submission->id)+"_"+std::to_string(other_submission.first->id)+".txt");
         
-        for (auto token : tokenized_submissions[__submission->id])
-        {
-            out << token << " ";
-        }
-        out << std::endl;
-        for (auto token : tokenized_submissions[other_submission.first->id])
-        {
-            out << token << " ";
-        }
-        out << std::endl;
+        // for (auto token : tokenized_submissions[__submission->id])
+        // {
+        //     out << token << " ";
+        // }
+        // out << std::endl;
+        // for (auto token : tokenized_submissions[other_submission.first->id])
+        // {
+        //     out << token << " ";
+        // }
+        // out << std::endl;
 
         if ( (curr_time - other_submission.second) > std::chrono::seconds(1))
         {
@@ -371,9 +376,9 @@ void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submis
 {
     auto curr_time = std::chrono::system_clock::now();
     std::cerr << "Submission added: " << __submission->id << " " << __submission->student->get_name() << " time:" <<curr_time<< std::endl;
-    tokenizer_t tokenizer(__submission->codefile);
-    auto tokens = tokenizer.get_tokens();
-    tokenized_submissions[__submission->id] = tokens;
+    
+
+    
     is_flagged[__submission->id] = false;
     this->submissions.push_back(std::make_pair(__submission, curr_time));
     pool.enqueue([this, __submission, curr_time]()
@@ -384,5 +389,6 @@ void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submis
 
 plagiarism_checker_t::~plagiarism_checker_t(void)
 {
+    std::cerr<<"Destructor called"<<std::endl;
 }
 // End TODO
