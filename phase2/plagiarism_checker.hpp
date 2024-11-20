@@ -64,12 +64,7 @@ public:
                         task = std::move(tasks.front());
                         tasks.pop();
                     }
-#ifdef PRINT_LOGS
-                    {
-                    std::lock_guard<std::mutex> lock(queue_mutex);
-                    std::cerr<<"doing some task"<<std::endl;
-                    }
-#endif
+                    
                     task();
                 } });
         }

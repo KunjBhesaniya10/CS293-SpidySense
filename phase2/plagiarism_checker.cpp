@@ -243,20 +243,12 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
     int i = 0;               // Start of window
     int continuous_size = 0; // Size of continuous match
 
-#ifdef OUTPUT_TOKENS
-    std::ofstream fall("fstreams/100000_hashes.txt");
-    fall << hash << " ";
-#endif
-
     while (i <= tokens1.size() - 15)
     {
         if (i != 0 && continuous_size == 0)
         {
             hash = (hash - (tokens1[i - 1] * x % PRIME) + PRIME) % PRIME;
             hash = (hash * 33 + tokens1[i + 14]) % PRIME;
-#ifdef OUTPUT_TOKENS
-            fall << hash << " ";
-#endif
         }
         else if (i != 0) // If continuous match found, recalculate hash of last 15 indices
         {
@@ -264,9 +256,6 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
             {
                 hash = (hash - (tokens1[k - 1] * x % PRIME) + PRIME) % PRIME;
                 hash = (hash * 33 + tokens1[k + 14]) % PRIME;
-#ifdef OUTPUT_TOKENS
-                fall << hash << " ";
-#endif
             }
         }
         auto it = hash_set.find(hash);
