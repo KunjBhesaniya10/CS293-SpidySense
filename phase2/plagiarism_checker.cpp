@@ -351,9 +351,9 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
         }
         else if (other_submission.second - curr_time < std::chrono::seconds(1) && other_submission.second - curr_time > -std::chrono::seconds(1))
         { // flag both
+            if (tokenized_submissions[other_submission.first->id].size() == 0)
             {
                 std::lock_guard<std::mutex> lock(mtx);
-                if (tokenized_submissions[other_submission.first->id].size() == 0)
                 {
                     tokenizer_t tokenizer(other_submission.first->codefile);
                     auto tokens = tokenizer.get_tokens();
@@ -397,10 +397,10 @@ void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submis
     std::cerr << "Submission added: " << __submission->id << " " << __submission->student->get_name() << " time:" << curr_time << std::endl;
 #endif
 
-    is_flagged[__submission->id] = false;
     {
         std::lock_guard<std::mutex> lock(mtx);
         this->submissions.push_back(std::make_pair(__submission, curr_time));
+        is_flagged[__submission->id] = false;
     }
     pool.enqueue([this, __submission, curr_time]()
                  { this->process_plagcheck_for_submission(__submission, curr_time); });
