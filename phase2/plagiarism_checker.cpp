@@ -355,7 +355,6 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
                 std::lock_guard<std::mutex> lock(mtx);
                 if (tokenized_submissions[other_submission.first->id].size() == 0)
                 {
-                    std::lock_guard<std::mutex> lock(mtx);
                     tokenizer_t tokenizer(other_submission.first->codefile);
                     auto tokens = tokenizer.get_tokens();
                     tokenized_submissions[other_submission.first->id] = tokens;
