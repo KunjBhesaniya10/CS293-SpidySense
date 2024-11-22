@@ -233,8 +233,12 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
     std::vector<Match> final_matches;                                                // Merged Matches
     std::vector<bool> matched(tokenized_submissions[submission2->id].size(), false); // To store which hashes are already matched (indices of submission2)
     int match_count = 0;
-    auto tokens1 = tokenized_submissions[submission1->id];
-    auto tokens2 = tokenized_submissions[submission2->id];
+    std::vector<int> tokens1, tokens2;
+    {
+    std::lock_guard<std::mutex> lock(mtx);
+     tokens1 = tokenized_submissions[submission1->id];
+     tokens2 = tokenized_submissions[submission2->id];
+    }
     std::unordered_map<long long, std::vector<int>> hash_set; // Stores Hash with index
     calculate_hashes(hash_set, tokens2, 15);                  // Calculate hashes of all substrings of length 15.
 
@@ -340,8 +344,11 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
 
     for (auto other_submission : copy_submissions)
     {
+        {
+            std::lock_guard<std::mutex> lock(mtx);
         if (other_submission.first->id == __submission->id || ((curr_time - other_submission.second) > std::chrono::seconds(1) && is_flagged[__submission->id]))
             continue;
+        }
 
         // Enqueue the task to the thread pool
         if ((curr_time - other_submission.second) > std::chrono::seconds(1))
@@ -375,7 +382,14 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
         }
     }
 #endif
-    if (!is_flagged[__submission->id])
+    bool flag = false;
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        if (!is_flagged[__submission->id]){
+                flag = true;
+             }
+    }
+    if(flag)
     {
         if (patchWork(MasterMatch))
         // Check for PatchWork Plagiarism based on master matches
