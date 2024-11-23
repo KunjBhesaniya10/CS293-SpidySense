@@ -69,7 +69,7 @@ bool patchWork(std::vector<Match> &intervals)
 }
 
 // Calculates the hash of given text and return {hash, hash_param:x}
-std::pair<long long, int> hashing(std::vector<int> text, int len)
+std::pair<long long, int> hashing(std::vector<int> &text, int len)
 {
     long long x = 1;
     long long hashed = 0;
@@ -233,8 +233,12 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
     std::vector<Match> final_matches;                                                // Merged Matches
     std::vector<bool> matched(tokenized_submissions[submission2->id].size(), false); // To store which hashes are already matched (indices of submission2)
     int match_count = 0;
-    auto tokens1 = tokenized_submissions[submission1->id];
-    auto tokens2 = tokenized_submissions[submission2->id];
+    std::vector<int> tokens1, tokens2;
+    {
+    std::lock_guard<std::mutex> lock(mtx);
+     tokens1 = tokenized_submissions[submission1->id];
+     tokens2 = tokenized_submissions[submission2->id];
+    }
     std::unordered_map<long long, std::vector<int>> hash_set; // Stores Hash with index
     calculate_hashes(hash_set, tokens2, 15);                  // Calculate hashes of all substrings of length 15.
 
@@ -320,20 +324,31 @@ std::vector<Match> plagiarism_checker_t::check_plagiarism(std::shared_ptr<submis
 // Function to process plagiarism check for a particular submission.
 void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<submission_t> __submission, std::chrono::time_point<std::chrono::system_clock> curr_time)
 {
+    auto instance_time = std::chrono::system_clock::now();
+    auto time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(instance_time - curr_time);
+    if (time_elapsed < std::chrono::seconds(1))
+    {
+        usleep(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::seconds(1) - time_elapsed).count());
+    }
     std::vector<std::pair<std::shared_ptr<submission_t>, std::chrono::time_point<std::chrono::system_clock>>> copy_submissions;
     { // Compute tokens for the submission, using lock_guard to lock the mutex because we're using tokenized_submissions
         std::lock_guard<std::mutex> lock(mtx);
-        tokenizer_t tokenizer(__submission->codefile);
-        auto tokens = tokenizer.get_tokens();
-        tokenized_submissions[__submission->id] = tokens;
-        copy_submissions = std::vector(submissions.begin(), submissions.end());
+        if (tokenized_submissions[__submission->id].size() == 0) {
+            tokenizer_t tokenizer(__submission->codefile);
+            auto tokens = tokenizer.get_tokens();
+            tokenized_submissions[__submission->id] = tokens;
+            copy_submissions = std::vector(submissions.begin(), submissions.end());
+        }
     }
     std::vector<Match> MasterMatch; // store all the matches with all other submissions.
 
     for (auto other_submission : copy_submissions)
     {
-        if (other_submission.first->id == __submission->id)
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+        if (other_submission.first->id == __submission->id || ((curr_time - other_submission.second) > std::chrono::seconds(1) && is_flagged[__submission->id]))
             continue;
+        }
 
         // Enqueue the task to the thread pool
         if ((curr_time - other_submission.second) > std::chrono::seconds(1))
@@ -341,8 +356,17 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
             auto m = (check_plagiarism(__submission, other_submission.first, false));
             MasterMatch.insert(MasterMatch.end(), m.begin(), m.end());
         }
-        else if (other_submission.second < curr_time)
+        else if (other_submission.second - curr_time < std::chrono::seconds(1) && other_submission.second - curr_time > -std::chrono::seconds(1))
         { // flag both
+            if (tokenized_submissions[other_submission.first->id].size() == 0)
+            {
+                std::lock_guard<std::mutex> lock(mtx);
+                {
+                    tokenizer_t tokenizer(other_submission.first->codefile);
+                    auto tokens = tokenizer.get_tokens();
+                    tokenized_submissions[other_submission.first->id] = tokens;
+                }
+            }
             auto m = (check_plagiarism(__submission, other_submission.first, true));
             MasterMatch.insert(MasterMatch.end(), m.begin(), m.end());
         }
@@ -358,7 +382,14 @@ void plagiarism_checker_t::process_plagcheck_for_submission(std::shared_ptr<subm
         }
     }
 #endif
-    if (!is_flagged[__submission->id])
+    bool flag = false;
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        if (!is_flagged[__submission->id]){
+                flag = true;
+             }
+    }
+    if(flag)
     {
         if (patchWork(MasterMatch))
         // Check for PatchWork Plagiarism based on master matches
@@ -380,10 +411,10 @@ void plagiarism_checker_t::add_submission(std::shared_ptr<submission_t> __submis
     std::cerr << "Submission added: " << __submission->id << " " << __submission->student->get_name() << " time:" << curr_time << std::endl;
 #endif
 
-    is_flagged[__submission->id] = false;
     {
         std::lock_guard<std::mutex> lock(mtx);
         this->submissions.push_back(std::make_pair(__submission, curr_time));
+        is_flagged[__submission->id] = false;
     }
     pool.enqueue([this, __submission, curr_time]()
                  { this->process_plagcheck_for_submission(__submission, curr_time); });

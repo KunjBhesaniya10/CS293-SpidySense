@@ -107,6 +107,8 @@
         "shared_mutex": "cpp",
         "typeindex": "cpp",
         "valarray": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "coroutine": "cpp",
+        "resumable": "cpp"
     }
 }
