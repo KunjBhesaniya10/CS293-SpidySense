@@ -72,17 +72,11 @@ public:
     }
 
     template <class F>
-    auto enqueue(F f) -> std::future<typename std::invoke_result<F>::type>
+    void enqueue(F&& f) 
     {
-        using return_type = typename std::invoke_result<F>::type;
-        auto task = std::make_shared<std::packaged_task<return_type()>>(std::move(f));
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            tasks.emplace([task]()
-                        { (*task)(); });
-        }
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        tasks.emplace(std::forward<F>(f));
         condition.notify_one();
-        return task->get_future();
     }
 
     void join_threads()
