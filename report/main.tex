@@ -1,0 +1,126 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{subcaption}
+\usepackage{graphicx} %For Images
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue, filecolor=blue]{hyperref} %For Coloring Links
+\usepackage[utf8]{inputenc}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage[rightcaption]{sidecap}
+\usepackage{verbatim}
+\usepackage[ a4paper , hmargin =0.6 in , bottom =0.5 in ]{ geometry }
+\usepackage{listings}
+% \renewcommand{\thepage}{Page \arabic{page}}% %Use to write Page 1 instead of 1 or can use %
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\usepackage{amsmath,mathtools,amsfonts} % Defines enviornment for align equations, using amsfonts for using blodface in align environments, mathtools for box around equations
+\setlength{\parindent}{0pt} % Set indent to zero
+
+\newcommand*{\pagewidthline}{\noindent\makebox[\linewidth]{\rule{\paperwidth}{1pt}}}
+\newcommand*{\textwidthline}{\noindent\rule{\textwidth}{0.6pt}}
+
+
+\title{CS293 Project : Plagiarism Checker}
+\author{Harshil Solanki \\{ 23B1016}
+\and
+Dhruvraj Merchant \\{ 23B1041}
+\and
+Kunj Bhesaniya \\{23B0995}}
+\begin{document}
+\maketitle
+% \tableofcontents
+% \clearpage
+\section{Phase One: Barebones Checking of Two Submissions} \vspace{-0.3cm}
+\subsection{Net Length of Accurate Matches:}
+Accurate Matches are identified using Rolling Hash Algorithm. Function Signatures used are:
+\begin{itemize}
+    \item hashing : Computes the hash value of the first window of a given sequence using modular arithmetic
+    \item calculate\_hashes : Generates hash values for all windows of size \textit{len} in the input sequence
+    \item rolling\_hash : Finds short matching patterns of varying lengths between two sequences
+    \item upper\_nonoverlap\_match : Finds the first non-overlapping match after a given match using binary search
+    \item remove\_overlap : Removes overlapping matches and maximizes the total length of matches using DP
+\end{itemize}
+
+\subsection{Longest Approximate Match and Start Position:}
+Approximate Matches are identified using Dynamic Programming (DP) and calculating the Longest Common Subsequence (LCS) between two submissions. Function Signatures used are:
+\begin{itemize}
+    \item similarity\_score : Calculates the similarity score = $\frac{matching\_length}{window\_size}$
+    \item Large\_pattern : Finds the largest pattern with a similarity score greater than a threshold
+    \item filter\_lcs : Filters the LCS to keep only continuous sequences of at least 10 elements
+    \item longestPattern : Finds the longest pattern match between two submissions using Dynamic Programming (DP)
+    \item evaluate\_plag : Evaluates plagiarism based on a threshold: if the short match is at least 60\% of the total length, or the large match is at least 50\%, it returns true, indicating plagiarism
+\end{itemize}
+
+\subsection{Flow:}
+match\_submissions calls rolling\_hash which calculates total length of exact matches by calling calculate\_hashes and remove\_overlap. Matches are stored in a struct which stores the start and end indices in both files. It then calls longestPattern which calculates the LCS and finds the longest approximate match by calling to filter\_lcs and Large\_pattern. Finally, evaluate\_plag is called to use the similarity score based length of matches and print the results.\\
+Overall Time Complexity: $O(nm)$, where n and m are the lengths of the two submissions being compared. 
+\\
+Overall Space Complexity: $O(nm)$, due to the space used by the LCS computation and rolling hash storage.
+
+\section{Phase Two: A Full-Fledged Plagiarism Checker}
+
+\subsection{Long Pattern Matches}
+The algorithm used to detect long pattern matches between files is based on the rolling hash technique. The function signature is: check\_plagiarism.
+This function calculates the hashes of all substrings of length 15 using the rolling hash technique and compares them between two submissions.
+
+\subsection{Patchwork Plagiarism}
+Patchwork plagiarism is detected by checking if there are more than 20 matches with different submissions. The function signature is: patchWork.
+This function sorts the intervals of matches and checks for overlapping matches to determine if patchwork plagiarism has occurred.
+
+\subsection{Short Pattern Matches}
+Short pattern matches are handled within the check\_plagiarism function. The function signature for handling small matches is handle\_small\_match.
+This function attempts to merge small matches with continuous matches.
+
+\subsection{Complexity Analysis}
+
+\subsubsection{Time Complexity}
+\textbf{Long Pattern Matches:} \(O(n \log n)\) for sorting intervals and \(O(n)\) for rolling hash calculation per file pair. \textbf{Patchwork Plagiarism:} \(O(n \log n)\) for sorting intervals. \textbf{Short Pattern Matches:} \(O(n)\) for each small match check.
+
+\subsubsection{Space Complexity}
+\textbf{Long Pattern Matches:} \(O(n)\) for storing hashes and intervals. \textbf{Patchwork Plagiarism:} \(O(n)\) for storing intervals. \textbf{Short Pattern Matches:} \(O(n)\) for storing matched indices.
+
+\subsection{Threading and Concurrency}
+Threading and concurrency are used to make \texttt{add\_submission} calls non-blocking. The \texttt{ThreadPool} class manages a pool of threads to handle tasks concurrently. The function signature for enqueuing tasks is:
+\begin{lstlisting}[language=C++]
+template <class F>
+void enqueue(F&& f);
+\end{lstlisting}
+This function adds tasks to a queue, which are then processed by the threads in the pool.
+
+\subsection{Identifying Files for Plagiarism Check}
+The set of files to check against is identified based on the submission timestamp. Submissions within one second of the current submission's timestamp are considered for plagiarism checking. This is handled in the \texttt{process\_plagcheck\_for\_submission} function.
+
+\subsection{Helpers, Data Structures, and Flow}
+
+\subsubsection{Helpers and Data Structures}
+\begin{itemize}
+    \item \texttt{Match} struct: Stores match details.
+    \item \texttt{ThreadPool} class: Manages a pool of threads.
+    \item \texttt{tokenized\_submissions}: Stores tokenized submissions.
+    \item \texttt{is\_flagged}: Tracks flagged submissions.
+\end{itemize}
+
+\subsubsection{Flow of the Algorithm}
+\begin{itemize}
+    \item \textbf{Constructor:} Initializes the thread pool and tokenizes initial submissions.
+    \item \textbf{add\_submission:} Adds a new submission and enqueues a plagiarism check task.
+    \item \textbf{process\_plagcheck\_for\_submission:} Processes plagiarism check for a submission.
+    \item \textbf{check\_plagiarism:} Checks for long pattern matches between two submissions.
+    \item \textbf{patchWork:} Checks for patchwork plagiarism.
+    \item \textbf{Destructor:} Joins all threads in the thread pool.
+\end{itemize}
+
+\end{document}
