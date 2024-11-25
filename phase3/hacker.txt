@@ -1,3 +1,24 @@
-testcases/two Hacked:
+/------checker_zero--------/
+Wrong Flag on testcases/one, Flase Positive. Longest Match less than Accurate matches
+
+/------checker_one---------/
+
+Wrong longest match with testcases/three
+
+/--------------------------/
+
+/--------checker_two-------/
+Wrong longest match with testcases/two
+
+/---checker_three----/
+
+testcases/two Hacked: Two different codes, one about Banking and other Library, False Positive
 checker_three (giving plag shouldn't give) {bug with lcs function or its thresold value in line 207}
 
+testcases/three: Two radically different codes marked as flag, Flase Positive
+length of longest match is less than length of accurate matches
+
+/------checker_four----------/
+Wrong flag on testcases/one, False Positive. Longest matches less than accurate
+
+/---------------------------/
