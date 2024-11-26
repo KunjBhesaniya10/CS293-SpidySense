@@ -1,113 +1,69 @@
-#include <iostream>
-#include <vector>
-#include <string>
-using namespace std;
-
-class Book {
+class Solution {
 public:
-    string title;
-    string author;
-    int year;
-    string genre;
+    vector<string> fullJustify(vector<string>& words, int maxWidth) {
+        vector<string>res;
+        int curr = 0, oglen = 0;
+        vector<string>aux;
+        //stores the words for the current row
+        for(string s : words)
+        {
+            int l = s.length();
+            // checking if the word can be taken in the current row or not
+            if(maxWidth-curr>l) 
+            {
+                curr+=s.length()+1;
+                oglen+=s.length();
+                aux.push_back(s);
+            }
+            else if(maxWidth-curr==l)
+            {
+                curr+=s.length();
+                oglen+=s.length();
+                aux.push_back(s);
+            }
+            else
+            {
+                curr = 0;
+                string help = "";
+                int totspaces = maxWidth-oglen; // total spaces needed to fit in the row
+            
+                oglen=0;
+                int pos = aux.size()-1;
+                //SIMULATION
+                for(string x : aux)
+                {
+                    int spaces=0;
+                    if(pos!=0)
+                        spaces = (ceil)(totspaces*1.00/pos);
+                    string sp="";
+                    for(int i=0;i<spaces;i++)
+                        sp+=" ";
+                    help+=x+sp;
+                    totspaces-=spaces;
+                    pos--;
+                }
+                aux.clear();
+                help=help.substr(0,maxWidth);
+                int extra=maxWidth-help.length();
+                for(int i=0;i<extra;i++)
+                    help+=" ";
+                res.push_back(help);
 
-    Book(string t, string a, int y, string g) : title(t), author(a), year(y), genre(g) {}
-
-    void display() const {
-        cout << title << " by " << author << " (" << year << ") - " << genre << endl;
-    }
-};
-
-class Library {
-private:
-    vector<Book> books;
-
-public:
-    void addBook(const string& title, const string& author, int year, const string& genre) {
-        Book newBook(title, author, year, genre);
-        books.push_back(newBook);
-        cout << "Book '" << title << "' added to the library.\n";
-    }
-
-    void removeBook(const string& title) {
-        for (auto it = books.begin(); it != books.end(); ++it) {
-            if (it->title == title) {
-                books.erase(it);
-                cout << "Book '" << title << "' removed from the library.\n";
-                return;
+                aux.push_back(s);
+                curr+=s.length()+1;
+                oglen+=s.length();
             }
         }
-        cout << "Book '" << title << "' not found in the library.\n";
-    }
-
-    void searchBook(const string& title) const {
-        for (const auto& book : books) {
-            if (book.title == title) {
-                cout << "Book found: ";
-                book.display();
-                return;
-            }
+        string help = "";
+        for(string x : aux)
+        {
+            help+=x+" ";
         }
-        cout << "Book '" << title << "' not found.\n";
-    }
-
-    void listBooks() const {
-        if (books.empty()) {
-            cout << "No books in the library.\n";
-            return;
-        }
-        cout << "Books in the library:\n";
-        for (const auto& book : books) {
-            book.display();
-        }
+        int spaces=maxWidth-help.length();
+        for(int i=0;i<spaces;i++)
+            help+=" ";
+        help = help.substr(0, maxWidth);
+        res.push_back(help);
+        return res;
     }
 };
-
-int main() {
-    Library lib;
-    int choice;
-    string title, author, genre;
-    int year;
-
-    do {
-        cout << "\nLibrary Management System\n";
-        cout << "1. Add Book\n2. Remove Book\n3. Search Book\n4. List Books\n5. Exit\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
-        cin.ignore();
-
-        switch (choice) {
-        case 1:
-            cout << "Enter title: ";
-            getline(cin, title);
-            cout << "Enter author: ";
-            getline(cin, author);
-            cout << "Enter year: ";
-            cin >> year;
-            cin.ignore();
-            cout << "Enter genre: ";
-            getline(cin, genre);
-            lib.addBook(title, author, year, genre);
-            break;
-        case 2:
-            cout << "Enter title to remove: ";
-            getline(cin, title);
-            lib.removeBook(title);
-            break;
-        case 3:
-            cout << "Enter title to search: ";
-            getline(cin, title);
-            lib.searchBook(title);
-            break;
-        case 4:
-            lib.listBooks();
-            break;
-        case 5:
-            cout << "Exiting Library System.\n";
-            break;
-        default:
-            cout << "Invalid choice. Try again.\n";
-        }
-    } while (choice != 5);
-
-    return 0;
-}
